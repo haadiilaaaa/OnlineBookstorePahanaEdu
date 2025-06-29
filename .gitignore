@@ -1,0 +1,13 @@
+/build/
+out/
+target/
+*.class
+*.log
+*.iml
+*.DS_Store
+*.bak
+*.tmp
+*.swp
+.idea/
+*.nb-gradle/
+nbproject/private/
