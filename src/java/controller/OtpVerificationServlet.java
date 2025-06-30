@@ -4,7 +4,7 @@ import dao.*;
 import db.DBConnection;
 import service.common.OtpVerificationService;
 import service.common.OtpVerificationServiceImpl;
-// ✅ CORRECT for Tomcat 9
+
 import javax.servlet.http.HttpServlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.sql.Connection;
-
+//servlet to hadle the verification of otp
 public class OtpVerificationServlet extends HttpServlet {
 
     private OtpVerificationService otpService;
