@@ -9,3 +9,4 @@ public interface CustomerDAO {
     int countCustomers() throws Exception;
      void verify(String userId) throws Exception;
 }
+//Data access layer for customer

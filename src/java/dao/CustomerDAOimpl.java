@@ -90,3 +90,4 @@ public class CustomerDAOimpl implements CustomerDAO {
         return customer;
     }
 }
+//Data Access implementation for customer
