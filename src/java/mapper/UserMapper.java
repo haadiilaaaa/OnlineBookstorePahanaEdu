@@ -49,3 +49,4 @@ public class UserMapper {
         return admin;
     }
 }
+//user mapper class implemented
