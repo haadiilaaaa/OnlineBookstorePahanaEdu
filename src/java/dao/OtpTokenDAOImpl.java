@@ -64,3 +64,4 @@ public OtpToken findValidToken(String userId, String userType, String otpCode) t
         }
     }
 }
+//data access implemetation for otp tokens
