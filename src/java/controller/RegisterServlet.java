@@ -108,7 +108,7 @@ String targetPage = switch (userType) {
     case "customer" -> "customerRegister.jsp";
     case "admin" -> "adminRegister.jsp";
     case "staff" -> "staffRegister.jsp";
-    default -> "index.jsp"; // fallback
+    default -> "index.jsp"; 
 };
 
 req.getRequestDispatcher(targetPage).forward(req, resp);
