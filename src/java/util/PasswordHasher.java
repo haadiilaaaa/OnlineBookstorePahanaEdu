@@ -1,7 +1,6 @@
 package util;
 
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 
 public class PasswordHasher {
 
@@ -20,5 +19,11 @@ public class PasswordHasher {
         } catch (Exception e) {
             throw new RuntimeException("Error hashing password", e);
         }
+    }
+
+    // ✅ Add this method for comparison
+    public static boolean verifyPassword(String rawPassword, String hashedPasswordFromDB) {
+        String hashedInput = hashPassword(rawPassword);
+        return hashedInput.equals(hashedPasswordFromDB);
     }
 }
