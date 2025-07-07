@@ -3,7 +3,8 @@ package dao;
 import model.Staff;
 
 import java.sql.*;
-
+import model.Customer;
+import util.*;
 public class StaffDAOImpl implements StaffDAO {
 
     private final Connection connection;
@@ -13,21 +14,31 @@ public class StaffDAOImpl implements StaffDAO {
     }
 
     @Override
-    public void save(Staff staff) throws Exception {
-        String sql = "INSERT INTO staff (id, username, first_name, last_name, email, contact_number, password_hash, is_verified) " +
-                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setString(1, staff.getId());
-            ps.setString(2, staff.getUsername());
-            ps.setString(3, staff.getFirstName());
-            ps.setString(4, staff.getLastName());
-            ps.setString(5, staff.getEmail());
-            ps.setString(6, staff.getContactNumber());
-            ps.setString(7, staff.getPasswordHash());
-            ps.setBoolean(8, staff.isVerified());
-            ps.executeUpdate();
+public void save(Staff staff) throws Exception {
+    String sql = "INSERT INTO staff (id, username, first_name, last_name, email, contact_number, password_hash, is_verified) " +
+                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        stmt.setString(1, staff.getId());
+        stmt.setString(2, staff.getUsername());
+        stmt.setString(3, staff.getFirstName());
+        stmt.setString(4, staff.getLastName());
+        stmt.setString(5, staff.getEmail());
+        stmt.setString(6, staff.getContactNumber());
+        stmt.setString(7, staff.getPasswordHash());
+        stmt.setBoolean(8, staff.isVerified());
+        stmt.executeUpdate();
+    } catch (SQLIntegrityConstraintViolationException e) {
+        if (e.getMessage().contains("staff.username")) {
+            throw new ValidationException("Username already exists.");
+        } else if (e.getMessage().contains("staff.email")) {
+            throw new ValidationException("Email already exists.");
+        } else {
+            throw new ValidationException("Duplicate entry detected.");
         }
+    } catch (SQLException e) {
+        throw new Exception("Database error while saving staff.", e);
     }
+}
 
     @Override
     public Staff findByEmail(String email) throws Exception {
@@ -85,6 +96,56 @@ public class StaffDAOImpl implements StaffDAO {
         staff.setPasswordHash(rs.getString("password_hash"));
         staff.setVerified(rs.getBoolean("is_verified"));
         return staff;
+    }
+     public int getMaxStaffIdNumber() throws SQLException {
+    String prefix = "st__";
+    String sql = "SELECT MAX(CAST(SUBSTRING(id, LENGTH(?) + 1) AS UNSIGNED)) AS max_id FROM staff WHERE id LIKE ?";
+
+    try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        stmt.setString(1, prefix);
+        stmt.setString(2, prefix + "%");
+
+        ResultSet rs = stmt.executeQuery();
+        if (rs.next()) {
+            return rs.getInt("max_id");  // Returns 0 if no existing IDs
+        }
+    }
+    return 0;
+}
+       @Override
+public Staff findById(String id) throws Exception {
+    String sql = "SELECT * FROM staff WHERE id = ?";
+    try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        stmt.setString(1, id);
+        ResultSet rs = stmt.executeQuery();
+        if (rs.next()) {
+            return extractStaffFromResultSet(rs);
+        }
+    }
+    return null;
+}
+@Override
+public Staff findByUsernameOrEmail(String input) throws Exception {
+    String sql = "SELECT * FROM staff WHERE username = ? OR email = ?";
+    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        ps.setString(1, input);
+        ps.setString(2, input);
+        ResultSet rs = ps.executeQuery();
+        if (rs.next()) {
+            return extractStaffFromResultSet(rs);
+        }
+    }
+    return null;
+}
+
+    @Override
+    public void updatePassword(String userId, String hashedPassword) throws Exception {
+        String sql = "UPDATE staff SET password_hash = ? WHERE id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, hashedPassword);
+            stmt.setString(2, userId);
+            stmt.executeUpdate();
+        }
     }
 }
 //data access implementation for staff

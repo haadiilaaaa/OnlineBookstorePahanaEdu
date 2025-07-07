@@ -2,18 +2,19 @@ package service.common;
 
 import dao.OtpTokenDAO;
 import model.OtpToken;
-import util.EmailSender;
 import util.OtpGenerator;
-
+import util.OtpSender;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 public class OtpSendServiceImpl implements OtpSendService {
 
     private final OtpTokenDAO otpTokenDAO;
+    private final OtpSender emailService;  // NEW
 
-    public OtpSendServiceImpl(OtpTokenDAO otpTokenDAO) {
+    public OtpSendServiceImpl(OtpTokenDAO otpTokenDAO, OtpSender emailService) {
         this.otpTokenDAO = otpTokenDAO;
+        this.emailService = emailService;  // NEW
     }
 
     @Override
@@ -30,10 +31,11 @@ public class OtpSendServiceImpl implements OtpSendService {
         otpToken.setCreatedAt(LocalDateTime.now());
 
         otpTokenDAO.save(otpToken);
-        EmailSender.sendOTP(email, otpCode);
-        System.out.println("OTP saved: " + otpCode + " for userId=" + userId + " userType=" + userType);
-        
 
+        // Use the injected EmailService instance here:
+        emailService.sendOTP(email, otpCode);
+
+        System.out.println("OTP saved: " + otpCode + " for userId=" + userId + " userType=" + userType);
     }
 }
 //otp send service implementation

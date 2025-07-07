@@ -39,6 +39,14 @@ public String getId() {
 public void setId(String id) {
     this.id = id;
 }
+private String confirmPassword;
 
+public String getConfirmPassword() {
+    return confirmPassword;
+}
+
+public void setConfirmPassword(String confirmPassword) {
+    this.confirmPassword = confirmPassword;
+}
 }
 //data transmission layer for cutomer
