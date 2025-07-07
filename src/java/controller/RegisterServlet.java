@@ -1,45 +1,29 @@
 package controller;
 
-import dto.AdminDTO;
-import dto.CustomerDTO;
-import dto.StaffDTO;
 import strategy.StrategyContext;
-import dao.*;
-import db.DBConnection;
-import util.IDGenerator;
-
+import util.ValidationException;
+import util.ErrorPageResolver;
+import util.RegistrationRequestBuilder;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.ServletContext;
-
+import javax.servlet.http.*;
 import java.io.IOException;
-import java.sql.Connection;
+import java.util.logging.Logger;
+import util.UserIdExtractor;
+import static util.contannts.PagePaths.*;
+import static util.contannts.ErrorMessages.*;
+import static util.contannts.ParameterKeys.*;
+import static util.contannts.AttributeKeys.*;
 
 public class RegisterServlet extends HttpServlet {
 
+    private static final Logger logger = Logger.getLogger(RegisterServlet.class.getName());
     private StrategyContext strategyContext;
-    private CustomerDAO customerDAO;
-    private AdminDAO adminDAO;
-    private StaffDAO staffDAO;
 
     @Override
     public void init() throws ServletException {
-        ServletContext context = getServletContext();
-        strategyContext = (StrategyContext) context.getAttribute("StrategyContext");
-
+        strategyContext = (StrategyContext) getServletContext().getAttribute("StrategyContext");
         if (strategyContext == null) {
-            throw new ServletException("StrategyContext not found in ServletContext.");
-        }
-
-        try {
-            Connection connection = DBConnection.getInstance().getConnection();
-            customerDAO = new CustomerDAOimpl(connection);
-            adminDAO = new AminDAOImpl(connection);
-            staffDAO = new StaffDAOImpl(connection);
-        } catch (Exception e) {
-            throw new ServletException("DAO initialization failed.", e);
+            throw new ServletException("StrategyContext not found.");
         }
     }
 
@@ -47,72 +31,29 @@ public class RegisterServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        String userType = req.getParameter("userType");
-        String userId = null;
+        String userType = req.getParameter(USER_TYPE);
 
         try {
-            switch (userType) {
-                case "customer" -> {
-                    CustomerDTO dto = new CustomerDTO();
-                    dto.setUsername(req.getParameter("username"));
-                    dto.setFirstName(req.getParameter("first_name"));
-                    dto.setLastName(req.getParameter("last_name"));
-                    dto.setEmail(req.getParameter("email"));
-                    dto.setContactNumber(req.getParameter("contact_number"));
-                    dto.setAddress(req.getParameter("address"));
-                    dto.setPassword(req.getParameter("password_hash"));
+            Object dto = RegistrationRequestBuilder.buildDTO(userType, req);
+            logger.info("Processing registration for userType: " + userType);
 
-                    String id = IDGenerator.generateId("cus", customerDAO.countCustomers());
-                    dto.setId(id); // ✅ set ID
-                    strategyContext.executeStrategy("customer", dto);
-                    userId = id;
-                }
-                case "admin" -> {
-                    AdminDTO dto = new AdminDTO();
-                    dto.setUsername(req.getParameter("username"));
-                    dto.setFirstName(req.getParameter("first_name"));
-                    dto.setLastName(req.getParameter("last_name"));
-                    dto.setEmail(req.getParameter("email"));
-                    dto.setContactNumber(req.getParameter("contact_number"));
-                    dto.setPassword(req.getParameter("password_hash"));
+            strategyContext.executeStrategy(userType, dto);
 
-                    String id = IDGenerator.generateId("admin", adminDAO.countAdmins());
-                    dto.setId(id); // ✅ set ID
-                    strategyContext.executeStrategy("admin", dto);
-                    userId = id;
-                }
-                case "staff" -> {
-                    StaffDTO dto = new StaffDTO();
-                    dto.setUsername(req.getParameter("username"));
-                    dto.setFirstName(req.getParameter("first_name"));
-                    dto.setLastName(req.getParameter("last_name"));
-                    dto.setEmail(req.getParameter("email"));
-                    dto.setContactNumber(req.getParameter("contact_number"));
-                    dto.setPassword(req.getParameter("password_hash"));
+            String userId = UserIdExtractor.extractId(userType, dto);
+            logger.info("Registration successful for userId: " + userId);
 
-                    String id = IDGenerator.generateId("staff", staffDAO.countStaff());
-                    dto.setId(id); // ✅ set ID
-                    strategyContext.executeStrategy("staff", dto);
-                    userId = id;
-                }
-                default -> throw new IllegalArgumentException("Invalid user type.");
-            }
+            resp.sendRedirect(OTP_VERIFICATION_PAGE + "?" + USER_ID + "=" + userId + "&" + USER_TYPE + "=" + userType);
 
-            // ✅ Redirect with actual userId and userType
-            resp.sendRedirect("otp-verification.jsp?userId=" + userId + "&userType=" + userType);
-
+        } catch (ValidationException ve) {
+            logger.warning("Validation failed: " + ve.getMessage());
+            req.setAttribute(ERROR, ve.getMessage());
+            String targetPage = ErrorPageResolver.resolve(userType);
+            req.getRequestDispatcher(targetPage).forward(req, resp);
         } catch (Exception e) {
-            req.setAttribute("error", e.getMessage());
-
-String targetPage = switch (userType) {
-    case "customer" -> "customerRegister.jsp";
-    case "admin" -> "adminRegister.jsp";
-    case "staff" -> "staffRegister.jsp";
-    default -> "index.jsp"; // fallback
-};
-
-req.getRequestDispatcher(targetPage).forward(req, resp);
-
+            logger.severe("Unexpected error: " + e.getMessage());
+            req.setAttribute(ERROR, GENERIC_ERROR);
+            String targetPage = ErrorPageResolver.resolve(userType);
+            req.getRequestDispatcher(targetPage).forward(req, resp);
         }
     }
 }
