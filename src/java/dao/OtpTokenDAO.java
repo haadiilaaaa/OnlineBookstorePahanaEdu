@@ -7,3 +7,4 @@ public interface OtpTokenDAO {
     OtpToken findValidToken(String userId, String userType, String otpCode) throws Exception;
     void markUsed(String tokenId) throws Exception;
 }
+//otp token dao

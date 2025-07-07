@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<web-app version="4.0" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd">
+<web-app version="4.0" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee                              http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd">
     <listener>
-    <listener-class>listener.AppContextListener</listener-class>
-</listener>
-
+        <listener-class>listener.AppContextListener</listener-class>
+    </listener>
     <servlet>
         <servlet-name>RegisterServlet</servlet-name>
         <servlet-class>controller.RegisterServlet</servlet-class>
@@ -11,6 +10,108 @@
     <servlet>
         <servlet-name>OtpVerificationServlet</servlet-name>
         <servlet-class>controller.OtpVerificationServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ResendOtpServlet</servlet-name>
+        <servlet-class>controller.ResendOtpServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>LoginServlet</servlet-name>
+        <servlet-class>controller.LoginServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ResetPasswordServlet</servlet-name>
+        <servlet-class>controller.ResetPasswordServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ForgotPasswordServlet</servlet-name>
+        <servlet-class>controller.ForgotPasswordServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>CustomerDashboardServlet</servlet-name>
+        <servlet-class>controller.CustomerDashboardServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>AdminDashboardServlet</servlet-name>
+        <servlet-class>controller.AdminDashboardServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>Admin_DashboardServlet</servlet-name>
+        <servlet-class>controller.admin.Admin_DashboardServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>Customer_DashboardServlet</servlet-name>
+        <servlet-class>controller.customer.Customer_DashboardServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ItemListServlet</servlet-name>
+        <servlet-class>controller.admin.ItemListServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>AddItemServlet</servlet-name>
+        <servlet-class>controller.admin.AddItemServlet</servlet-class>
+        <multipart-config>
+            <location>C:/Users/Admin/OneDrive/Documents/NetBeansProjects/Onile_bookstore_pahanaedu/web/uploads/</location>
+            <max-file-size>5242880</max-file-size>
+            <max-request-size>10485760</max-request-size>
+            <file-size-threshold>1048576</file-size-threshold>
+        </multipart-config>
+    </servlet>
+    <servlet>
+        <servlet-name>ManageCategoriesServlet</servlet-name>
+        <servlet-class>controller.admin.ManageCategoriesServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ManageDiscountServlet</servlet-name>
+        <servlet-class>controller.admin.ManageDiscountServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>BookBrowseServlet</servlet-name>
+        <servlet-class>controller.customer.BookBrowseServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>AddToCartServlet</servlet-name>
+        <servlet-class>controller.customer.AddToCartServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>UpdateCartServlet</servlet-name>
+        <servlet-class>controller.admin.UpdateCartServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>UpdatecartServlet</servlet-name>
+        <servlet-class>controller.customer.UpdatecartServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>RemoveCartServlet</servlet-name>
+        <servlet-class>controller.customer.RemoveCartServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>RemoveCartItemServlet</servlet-name>
+        <servlet-class>controller.customer.RemoveCartItemServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>CheckoutServlet</servlet-name>
+        <servlet-class>controller.customer.CheckoutServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>PlaceOrderServlet</servlet-name>
+        <servlet-class>controller.customer.PlaceOrderServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>CustomerOrderHistoryServlet</servlet-name>
+        <servlet-class>controller.customer.CustomerOrderHistoryServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>CancelOrderServlet</servlet-name>
+        <servlet-class>controller.customer.CancelOrderServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>AdminOrderHistoryServlet</servlet-name>
+        <servlet-class>controller.admin.AdminOrderHistoryServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>AdminUpdateOrderStatusServlet</servlet-name>
+        <servlet-class>controller.admin.AdminUpdateOrderStatusServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>RegisterServlet</servlet-name>
@@ -20,11 +121,130 @@
         <servlet-name>OtpVerificationServlet</servlet-name>
         <url-pattern>/OtpVerificationServlet</url-pattern>
     </servlet-mapping>
- 
-
+    <servlet-mapping>
+        <servlet-name>ResendOtpServlet</servlet-name>
+        <url-pattern>/ResendOtpServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>LoginServlet</servlet-name>
+        <url-pattern>/LoginServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ResetPasswordServlet</servlet-name>
+        <url-pattern>/ResetPasswordServlet</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>AddToCartServlet</servlet-name>
+        <servlet-class>controller.customer.AddToCartServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AddToCartServlet</servlet-name>
+        <url-pattern>/addToCart</url-pattern>
+    </servlet-mapping>
+    <!-- JUnit 5 (Jupiter) -->
+    <dependency>
+        <groupId>org.junit.jupiter</groupId>
+        <artifactId>junit-jupiter</artifactId>
+        <version>5.10.2</version>
+        <scope>test</scope>
+    </dependency>
+    <dependency>
+        <groupId>javax.servlet</groupId>
+        <artifactId>jstl</artifactId>
+        <version>1.2</version>
+    </dependency>
+    <!-- Mockito Core -->
+    <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-core</artifactId>
+        <version>5.12.0</version>
+        <scope>test</scope>
+    </dependency>
+    <servlet-mapping>
+        <servlet-name>ForgotPasswordServlet</servlet-name>
+        <url-pattern>/ForgotPasswordServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CustomerDashboardServlet</servlet-name>
+        <url-pattern>/CustomerDashboardServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>AdminDashboardServlet</servlet-name>
+        <url-pattern>/AdminDashboardServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Admin_DashboardServlet</servlet-name>
+        <url-pattern>/Admin_DashboardServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Customer_DashboardServlet</servlet-name>
+        <url-pattern>/Customer_DashboardServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ItemListServlet</servlet-name>
+        <url-pattern>/ItemListServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>AddItemServlet</servlet-name>
+        <url-pattern>/AddItemServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ManageCategoriesServlet</servlet-name>
+        <url-pattern>/ManageCategoriesServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ManageDiscountServlet</servlet-name>
+        <url-pattern>/ManageDiscountServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>BookBrowseServlet</servlet-name>
+        <url-pattern>/BookBrowseServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>AddToCartServlet</servlet-name>
+        <url-pattern>/AddToCartServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>UpdatecartServlet</servlet-name>
+        <url-pattern>/UpdatecartServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>RemoveCartServlet</servlet-name>
+        <url-pattern>/RemoveCartServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>RemoveCartItemServlet</servlet-name>
+        <url-pattern>/RemoveCartItemServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CheckoutServlet</servlet-name>
+        <url-pattern>/CheckoutServlet</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>PlaceOrderServlet</servlet-name>
+        <servlet-class>controller.customer.PlaceOrderServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>PlaceOrderServlet</servlet-name>
+        <url-pattern>/customer/PlaceOrderServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CustomerOrderHistoryServlet</servlet-name>
+        <url-pattern>/CustomerOrderHistoryServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CancelOrderServlet</servlet-name>
+        <url-pattern>/CancelOrderServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>AdminOrderHistoryServlet</servlet-name>
+        <url-pattern>/AdminOrderHistoryServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>AdminUpdateOrderStatusServlet</servlet-name>
+        <url-pattern>/AdminUpdateOrderStatusServlet</url-pattern>
+    </servlet-mapping>
     <session-config>
-        <session-timeout>
-            30
-        </session-timeout>
+        <session-timeout>30</session-timeout>
     </session-config>
 </web-app>
