@@ -7,3 +7,4 @@ public interface AdminOrderService {
     List<OrderDTO> getAllOrdersWithCustomerInfo() throws Exception;
     void updateOrderStatusAndNotify(String orderId, String newStatus) throws Exception;
 }
+//

@@ -16,5 +16,5 @@ public interface DiscountManagementService {
     void removeAssignment(String assignmentId) throws Exception;
 
 
-    
+    // discount management
 }

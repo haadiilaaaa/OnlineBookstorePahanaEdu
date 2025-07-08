@@ -8,3 +8,4 @@ public interface PasswordResetTokenDAO {
     PasswordResetToken findByToken(String token) throws Exception;
     void markAsUsed(String token) throws Exception;
 }
+//hii

@@ -4,7 +4,7 @@ import model.Admin;
 
 import java.sql.*;
 import util.*;
-public class AminDAOImpl implements AdminDAO {
+public class AminDAOImpl implements AdminDAO, GenericUserDAO,PasswordUpdatabale  {
 
     private final Connection connection;
 

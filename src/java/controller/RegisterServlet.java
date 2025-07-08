@@ -4,11 +4,14 @@ import strategy.StrategyContext;
 import util.ValidationException;
 import util.ErrorPageResolver;
 import util.RegistrationRequestBuilder;
+import util.UserIdExtractor;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
 import java.io.IOException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
-import util.UserIdExtractor;
+
 import static util.contannts.PagePaths.*;
 import static util.contannts.ErrorMessages.*;
 import static util.contannts.ParameterKeys.*;
@@ -33,6 +36,14 @@ public class RegisterServlet extends HttpServlet {
 
         String userType = req.getParameter(USER_TYPE);
 
+        // Null or empty userType validation
+        if (userType == null || userType.isEmpty()) {
+            logger.warning("User type is missing or empty.");
+            req.setAttribute(ERROR, "User type is required.");
+            req.getRequestDispatcher(LOGIN_PAGE).forward(req, resp);
+            return;
+        }
+
         try {
             Object dto = RegistrationRequestBuilder.buildDTO(userType, req);
             logger.info("Processing registration for userType: " + userType);
@@ -42,32 +53,24 @@ public class RegisterServlet extends HttpServlet {
             String userId = UserIdExtractor.extractId(userType, dto);
             logger.info("Registration successful for userId: " + userId);
 
+            // Redirect to OTP verification page
             resp.sendRedirect(OTP_VERIFICATION_PAGE + "?" + USER_ID + "=" + userId + "&" + USER_TYPE + "=" + userType);
 
         } catch (ValidationException ve) {
             logger.warning("Validation failed: " + ve.getMessage());
             req.setAttribute(ERROR, ve.getMessage());
+
+            // Use ErrorPageResolver for error page path
             String targetPage = ErrorPageResolver.resolve(userType);
             req.getRequestDispatcher(targetPage).forward(req, resp);
+
         } catch (Exception e) {
-
-            req.setAttribute("error", e.getMessage());
-
-String targetPage = switch (userType) {
-    case "customer" -> "customerRegister.jsp";
-    case "admin" -> "adminRegister.jsp";
-    case "staff" -> "staffRegister.jsp";
-    default -> "index.jsp"; 
-};
-
-req.getRequestDispatcher(targetPage).forward(req, resp);
-
-
-            logger.severe("Unexpected error: " + e.getMessage());
+            logger.log(Level.SEVERE, "Unexpected error during registration", e);
             req.setAttribute(ERROR, GENERIC_ERROR);
-           
-            req.getRequestDispatcher(targetPage).forward(req, resp);
 
+            // fallback error page
+            String targetPage = ErrorPageResolver.resolve(userType);
+            req.getRequestDispatcher(targetPage).forward(req, resp);
         }
     }
 }

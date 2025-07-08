@@ -6,7 +6,7 @@ import dao.StaffDAO;
 import util.*;
 
 public class GlobalUserValidator {
-
+//
     private final CustomerDAO customerDAO;
     private final AdminDAO adminDAO;
     private final StaffDAO staffDAO;

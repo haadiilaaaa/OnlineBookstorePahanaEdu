@@ -15,7 +15,7 @@ public class OtpEmailSenderImpl implements OtpSender {
         this.password = password;
         this.mailProperties = mailProperties;
     }
-
+//
     @Override
     public void sendOTP(String toEmail, String otpCode) throws Exception {
         Session session = Session.getInstance(mailProperties, new Authenticator() {

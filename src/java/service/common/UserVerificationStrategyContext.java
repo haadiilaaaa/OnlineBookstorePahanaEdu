@@ -12,10 +12,12 @@ public class UserVerificationStrategyContext {
     }
 
     public void verify(String userType, String userId) throws Exception {
-        UserVerificationStrategy strategy = strategyMap.get(userType);
+        UserVerificationStrategy strategy = strategyMap.get(userType.toLowerCase());
+
         if (strategy == null) {
-            throw new IllegalArgumentException("Unknown user type: " + userType);
+            throw new IllegalArgumentException("No strategy found for userType: " + userType);
         }
+
         strategy.verify(userId);
     }
 }

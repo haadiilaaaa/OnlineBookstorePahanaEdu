@@ -4,6 +4,7 @@ package service.common;
 import dao.CustomerDAO;
 
 public class CustomerVerificationStrategy implements UserVerificationStrategy {
+
     private final CustomerDAO customerDAO;
 
     public CustomerVerificationStrategy(CustomerDAO customerDAO) {

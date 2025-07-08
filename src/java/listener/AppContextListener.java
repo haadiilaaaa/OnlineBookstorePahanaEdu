@@ -10,7 +10,7 @@ import service.customer.*;
 import service.staff.*;
 import strategy.*;
 import util.*;
-
+import util.redirect.*;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
@@ -19,6 +19,9 @@ import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
+
 
 import com.mysql.cj.jdbc.AbandonedConnectionCleanupThread;
 
@@ -72,6 +75,33 @@ public class AppContextListener implements ServletContextListener {
             sce.getServletContext().setAttribute("StrategyContext", strategyContext);
             sce.getServletContext().setAttribute("GeneralEmailService", generalEmailService);
 
+            // === OTP Verification Service and Redirect Strategies setup ===
+            
+             Map<String, UserVerificationStrategy> userVerificationStrategies = new HashMap<>();
+userVerificationStrategies.put("customer", new CustomerVerificationStrategy(customerDAO));
+userVerificationStrategies.put("admin", new AdminVerificationStrategy(adminDAO));
+userVerificationStrategies.put("staff", new StaffVerificationStrategy(staffDAO));
+
+UserVerificationStrategyContext verificationStrategyContext = new UserVerificationStrategyContext(userVerificationStrategies);
+
+            // === OTP Verification Service ===
+          OtpVerificationService otpVerificationService = new OtpVerificationServiceImpl(
+        otpDAO, verificationStrategyContext);
+
+// Register it in the servlet context so the servlet can get it
+sce.getServletContext().setAttribute("OtpVerificationService", otpVerificationService);
+
+
+            // === OTP Redirect Strategies ===
+            Map<String, OtpRedirectStrategy> otpRedirectStrategies = new HashMap<>();
+            otpRedirectStrategies.put("customer", new CustomerOtpRedirectStrategy());
+            otpRedirectStrategies.put("admin", new AdminOtpRedirectStrategy());
+            otpRedirectStrategies.put("staff", new StaffOtpRedirectStrategy());
+            
+
+            // 5. Save OTP redirect strategies map in servlet context
+            sce.getServletContext().setAttribute("OtpRedirectStrategies", otpRedirectStrategies);
+
             // === New: create and register admin/item services ===
 
             // DAOs needed by ItemService
@@ -81,13 +111,12 @@ public class AppContextListener implements ServletContextListener {
             // Mappers needed by services
             ItemMapper itemMapper = new ItemMapper();
             CategoryMapper categoryMapper = new CategoryMapper();
-            
+
             DiscountDAO discountDAO = new DicountDAOimpl(connection);
             DiscountAssignmentDAO discountAssignmentDAO = new DiscountAssignmentDAOImpl(connection);
-            
 
             // Create services with dependencies
-            ItemService itemService = new ItemServiceImpl(itemDAO, categoryDAO, itemMapper,discountDAO,
+            ItemService itemService = new ItemServiceImpl(itemDAO, categoryDAO, itemMapper, discountDAO,
                     discountAssignmentDAO);
             CategoryService categoryService = new CategoryServiceImpl(categoryDAO, categoryMapper);
 

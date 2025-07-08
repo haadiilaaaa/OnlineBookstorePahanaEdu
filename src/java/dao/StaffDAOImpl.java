@@ -5,7 +5,8 @@ import model.Staff;
 import java.sql.*;
 import model.Customer;
 import util.*;
-public class StaffDAOImpl implements StaffDAO {
+//
+public class StaffDAOImpl implements StaffDAO, GenericUserDAO ,PasswordUpdatabale {
 
     private final Connection connection;
 

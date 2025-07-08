@@ -2,83 +2,100 @@ package controller;
 
 import dao.*;
 import db.DBConnection;
-import model.*;
-import service.common.OtpSendService;
-import service.common.OtpSendServiceImpl;
+import model.enums.UserType;
+import service.common.*;
 import util.*;
+import util.contannts.*;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
 import java.io.IOException;
 import java.sql.Connection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Logger;
 
 public class ResendOtpServlet extends HttpServlet {
 
-    private CustomerDAO customerDAO;
-    private AdminDAO adminDAO;
-    private StaffDAO staffDAO;
+    private static final Logger logger = Logger.getLogger(ResendOtpServlet.class.getName());
+
+    private UserService userService;
     private OtpSendService otpSendService;
+    private OtpRateLimiter otpRateLimiter;
 
     @Override
-public void init() throws ServletException {
-    try {
-        Connection connection = DBConnection.getInstance().getConnection();
-        customerDAO = new CustomerDAOimpl(connection);
-        adminDAO = new AminDAOImpl(connection);  // make sure spelling is correct
-        staffDAO = new StaffDAOImpl(connection);
-        OtpTokenDAO otpTokenDAO = new OtpTokenDAOImpl(connection);
-        OtpSender emailService = EmailServiceFactory.createOtpEmailService();
+    public void init() throws ServletException {
+        try {
+            Connection connection = DBConnection.getInstance().getConnection();
 
-        this.otpSendService = new OtpSendServiceImpl(otpTokenDAO, emailService);  // <-- fix here
+            Map<String, GenericUserDAO> daoMap = new HashMap<>();
+            daoMap.put(UserType.CUSTOMER.getValue(), new CustomerDAOimpl(connection));
+            daoMap.put(UserType.ADMIN.getValue(), new AminDAOImpl(connection));
+            daoMap.put(UserType.STAFF.getValue(), new StaffDAOImpl(connection));
 
-    } catch (Exception e) {
-        throw new ServletException("Failed to initialize ResendOtpServlet", e);
-    }
-}
+            userService = new UserServiceImpl(Collections.unmodifiableMap(daoMap));
 
+            OtpTokenDAO otpTokenDAO = new OtpTokenDAOImpl(connection);
+            otpSendService = new OtpSendServiceImpl(otpTokenDAO, EmailServiceFactory.createOtpEmailService());
 
-  @Override
-protected void doPost(HttpServletRequest req, HttpServletResponse resp)
-        throws ServletException, IOException {
+            otpRateLimiter = GlobalOtpRateLimiter.getInstance();
 
-    String userId = req.getParameter("userId");
-    String userType = req.getParameter("userType");
-
-    try {
-        String email = null;
-
-        switch (userType) {
-            case "customer" -> {
-                Customer customer = customerDAO.findById(userId);
-                if (customer != null) email = customer.getEmail();
-            }
-            case "admin" -> {
-                Admin admin = adminDAO.findById(userId);
-                if (admin != null) email = admin.getEmail();
-            }
-            case "staff" -> {
-                Staff staff = staffDAO.findById(userId);
-                if (staff != null) email = staff.getEmail();
-            }
-            default -> throw new IllegalArgumentException("Invalid user type");
+        } catch (Exception e) {
+            logger.severe("Initialization failed: " + e.getMessage());
+            throw new ServletException("ResendOtpServlet init failed", e);
         }
-
-        if (email != null) {
-            otpSendService.sendOtp(userId, userType, email);
-            req.setAttribute("success", "A new OTP has been sent to your email.");
-        } else {
-            req.setAttribute("error", "Failed to find user for OTP resend.");
-        }
-
-    } catch (Exception e) {
-        // Log the full exception (to server logs)
-        e.printStackTrace();
-
-        // Show a simple user-friendly message (avoid exposing internal details)
-        req.setAttribute("error", "Failed to resend OTP. Please try again later.");
     }
 
-    req.setAttribute("userId", userId);
-    req.setAttribute("userType", userType);
-    req.getRequestDispatcher("otp-verification.jsp").forward(req, resp);
-}
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+
+        String userId = req.getParameter(ParameterKeys.USER_ID);
+        String userType = req.getParameter(ParameterKeys.USER_TYPE);
+
+        if (userId == null || userId.isBlank() ||
+            userType == null || userType.isBlank() ||
+            !UserType.isValid(userType)) {
+
+            req.setAttribute(AttributeKeys.ERROR, MessageResolver.get("otp.invalid_request"));
+            req.getRequestDispatcher(PagePaths.OTP_VERIFICATION_PAGE).forward(req, resp);
+            return;
+        }
+
+        String rateLimitKey = userType + ":" + userId;
+
+        if (!otpRateLimiter.tryAcquire(rateLimitKey)) {
+            long waitMs = otpRateLimiter.getRetryAfter(rateLimitKey);
+            long waitSec = waitMs / 1000;
+            req.setAttribute(AttributeKeys.ERROR, MessageResolver.get("otp.too_many_requests", waitSec));
+            forwardBack(req, resp, userId, userType);
+            return;
+        }
+
+        try {
+            String email = userService.getEmailByUserIdAndType(userId.trim(), userType.trim());
+
+            if (email != null && !email.isEmpty()) {
+                otpSendService.sendOtp(userId, userType, email);
+                req.setAttribute(AttributeKeys.SUCCESS, MessageResolver.get("otp.sent_success"));
+                logger.info("OTP resent → userId=" + userId + ", userType=" + userType);
+            } else {
+                req.setAttribute(AttributeKeys.ERROR, MessageResolver.get("otp.user_not_found"));
+            }
+
+        } catch (Exception e) {
+            logger.severe("OTP resend error for userId=" + userId + ": " + e.getMessage());
+            req.setAttribute(AttributeKeys.ERROR, MessageResolver.get("otp.internal_error"));
+        }
+
+        forwardBack(req, resp, userId, userType);
+    }
+
+    private void forwardBack(HttpServletRequest req, HttpServletResponse resp, String userId, String userType)
+            throws ServletException, IOException {
+        req.setAttribute(ParameterKeys.USER_ID, userId);
+        req.setAttribute(ParameterKeys.USER_TYPE, userType);
+        req.getRequestDispatcher(PagePaths.OTP_VERIFICATION_PAGE).forward(req, resp);
+    }
 }

@@ -5,7 +5,7 @@ import model.Customer;
 import util.*;
 import java.sql.*;
 
-public class CustomerDAOimpl implements CustomerDAO {
+public class CustomerDAOimpl implements CustomerDAO, GenericUserDAO ,PasswordUpdatabale {
 
     private final Connection connection;
 
@@ -151,7 +151,7 @@ public void updatePassword(String userId, String hashedPassword) throws Exceptio
         stmt.executeUpdate();
     }
 }
-
+//hadilaaaaaaaaa
 
 }
 //Data Access implementation for customer

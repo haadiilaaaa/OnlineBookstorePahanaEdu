@@ -4,7 +4,7 @@ import model.CartItem;
 import model.Category;
 import java.math.BigDecimal;
 import java.util.List;
-
+//cart item dao
 public interface CartItemDAO {
 
     /**

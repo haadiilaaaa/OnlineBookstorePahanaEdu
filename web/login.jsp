@@ -224,10 +224,16 @@
         <%= error %>
     </div>
 <% } %>
-    <% String success = request.getParameter("success"); %>
-    <% if (success != null) { %>
-        <div class="success"><%= success %></div>
-    <% } %>
+    <%
+    String successMessage = (String) session.getAttribute("successMessage");
+    if (successMessage != null) {
+%>
+    <div class="success"><%= successMessage %></div>
+<%
+        session.removeAttribute("successMessage"); // Remove after showing once
+    }
+%>
+
 
     <form action="LoginServlet" method="post">
         <div class="form-group">

@@ -1,63 +1,96 @@
 package controller;
 
-import dao.*;
-import db.DBConnection;
 import service.common.OtpVerificationService;
-import service.common.OtpVerificationServiceImpl;
+import util.contannts.ParameterKeys;
+import util.contannts.AttributeKeys;
+import util.contannts.PagePaths;
+import util.contannts.ErrorMessages;
+import util.redirect.OtpRedirectStrategy;
+import util.redirect.AdminOtpRedirectStrategy;
+import util.redirect.CustomerOtpRedirectStrategy;
+import util.redirect.StaffOtpRedirectStrategy;
 
-import java.util.logging.Level;
-import service.common.OtpVerificationServiceFactory;
-
-import javax.servlet.http.HttpServlet;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.util.logging.Logger;
+import javax.servlet.http.*;
 import java.io.IOException;
-import java.sql.Connection;
-//servlet to hadle the verification of otp
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Logger;
+
 public class OtpVerificationServlet extends HttpServlet {
- private static final Logger logger = Logger.getLogger(OtpVerificationServlet.class.getName());
-    private OtpVerificationService otpService;
+
+    private static final Logger logger = Logger.getLogger(OtpVerificationServlet.class.getName());
+
+    private OtpVerificationService otpVerificationService;
+
+    // Map of userType -> redirect strategy
+    private Map<String, OtpRedirectStrategy> redirectStrategies;
 
     @Override
 public void init() throws ServletException {
-    try {
-        otpService = OtpVerificationServiceFactory.createService();
-    } catch (Exception e) {
-        throw new ServletException("Failed to initialize OtpVerificationServlet", e);
+    otpVerificationService = (OtpVerificationService) getServletContext().getAttribute("OtpVerificationService");
+    if (otpVerificationService == null) {
+        throw new ServletException("OtpVerificationService not initialized");
+    }
+
+    Object redirectStrategiesObj = getServletContext().getAttribute("OtpRedirectStrategies");
+    if (redirectStrategiesObj instanceof Map<?, ?>) {
+        redirectStrategies = (Map<String, OtpRedirectStrategy>) redirectStrategiesObj;
+    } else {
+        throw new ServletException("OtpRedirectStrategies map not found or invalid");
     }
 }
 
     @Override
-protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+        throws ServletException, IOException {
 
-    String userId = req.getParameter("userId");
-    String userType = req.getParameter("userType");
-    String enteredOtp = req.getParameter("otp");
+    String userId = req.getParameter(ParameterKeys.USER_ID);
+    String userType = req.getParameter(ParameterKeys.USER_TYPE);
+    String enteredOtp = req.getParameter(ParameterKeys.OTP_CODE);
 
-    try {
-    logger.info("Verifying OTP: " + enteredOtp + " for userId=" + userId + ", userType=" + userType);
-    boolean isVerified = otpService.verifyOtp(userId, userType, enteredOtp);
+    if (userId == null || userId.isEmpty() ||
+        userType == null || userType.isEmpty() ||
+        enteredOtp == null || enteredOtp.isEmpty()) {
 
-    if (isVerified) {
-        resp.sendRedirect("login.jsp?success=Registration+successful!+You+can+now+log+in.");
-    } else {
-        // Only handle known verification failure here
-        req.setAttribute("error", "Invalid or expired OTP.");
-        req.setAttribute("userId", userId);
-        req.setAttribute("userType", userType);
-        req.getRequestDispatcher("otp-verification.jsp").forward(req, resp);
+        req.setAttribute(AttributeKeys.ERROR, "All fields are required.");
+        req.getRequestDispatcher(PagePaths.OTP_VERIFICATION_PAGE).forward(req, resp);
+        return;
     }
 
-} catch (Exception e) {
-    logger.log(Level.SEVERE, "Unexpected verification error", e);
-    // Real exception path
-    req.setAttribute("error", "An unexpected error occurred. Please try again later.");
-    req.setAttribute("userId", userId);
-    req.setAttribute("userType", userType);
-    req.getRequestDispatcher("otp-verification.jsp").forward(req, resp);
+    try {
+        boolean verified = otpVerificationService.verifyOtp(userId, userType, enteredOtp);
+
+        if (verified) {
+            logger.info("OTP verified successfully for userId: " + userId);
+
+            // Store success message in session (so it survives redirect)
+            HttpSession session = req.getSession();
+            session.setAttribute("successMessage", "Verification successful! You can now login.");
+
+            OtpRedirectStrategy strategy = redirectStrategies.get(userType);
+            if (strategy != null) {
+                strategy.redirect(req, resp);
+            } else {
+                resp.sendRedirect("login.jsp");
+            }
+
+        } else {
+            logger.warning("Failed OTP verification for userId: " + userId);
+            req.setAttribute(AttributeKeys.ERROR, "Invalid or expired OTP.");
+            req.getRequestDispatcher(PagePaths.OTP_VERIFICATION_PAGE).forward(req, resp);
+        }
+
+    } catch (Exception e) {
+        logger.severe("Error verifying OTP: " + e.getMessage());
+        req.setAttribute(AttributeKeys.ERROR, ErrorMessages.INTERNAL_ERROR);
+        req.getRequestDispatcher(PagePaths.OTP_VERIFICATION_PAGE).forward(req, resp);
+    }
 }
 
-}
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+        req.getRequestDispatcher(PagePaths.OTP_VERIFICATION_PAGE).forward(req, resp);
+    }
 }
