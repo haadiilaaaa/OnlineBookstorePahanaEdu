@@ -43,8 +43,8 @@
 <!-- Filter form -->
 <form method="get" action="BookBrowseServlet">
     <label for="category">Category:</label>
-    <select name="categoryId" id="category">
-        <option value="">-- All Categories --</option>
+    <select name="category" id="category"> <!-- was categoryId -->
+        <option value="">-- All Categories --</option>
         <c:forEach var="category" items="${categories}">
             <option value="${category.id}"
                     <c:if test="${category.id == selectedCategory}">selected</c:if>>
@@ -54,12 +54,12 @@
     </select>
 
     <label for="search">Search:</label>
-    <input type="text" name="search" id="search" value="${searchKeyword}" />
+    <input type="text" name="keyword" id="search" value="${searchKeyword}" /> <!-- was search -->
 
-    <label for="minPrice">Min Price:</label>
+    <label for="minPrice">Min Price:</label>
     <input type="number" step="0.01" name="minPrice" id="minPrice" value="${minPrice}" />
 
-    <label for="maxPrice">Max Price:</label>
+    <label for="maxPrice">Max Price:</label>
     <input type="number" step="0.01" name="maxPrice" id="maxPrice" value="${maxPrice}" />
 
     <button type="submit">Filter</button>

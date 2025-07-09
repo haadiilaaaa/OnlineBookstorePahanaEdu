@@ -1,4 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+
 <%@ page import="java.util.Map" %>
 <%@ page import="model.CartItem" %>
 <%@ page import="java.math.BigDecimal" %>
@@ -71,6 +73,12 @@
     </style>
 </head>
 <body>
+   <c:if test="${not empty sessionScope.success}">
+    <div class="alert alert-success">${sessionScope.success}</div>
+</c:if>
+<c:if test="${not empty sessionScope.error}">
+    <div class="alert alert-danger">${sessionScope.error}</div>
+</c:if>
 
 <h1 style="text-align: center;">Your Shopping Cart</h1>
 
@@ -116,6 +124,7 @@
                 </td>
                 <td>
                     <form method="post" action="<%= contextPath %>/UpdatecartServlet">
+
                         <input type="hidden" name="itemId" value="<%= item.getItemId() %>" />
                         <input type="number" name="quantity" value="<%= item.getQuantity() %>" min="1"/>
                         <button type="submit">Update</button>
