@@ -2,98 +2,61 @@ package controller.customer;
 
 import dto.CategoryDTO;
 import dto.ItemDTO;
-import model.CartItem;
 import dto.UserSession;
 import service.admin.CategoryService;
-import service.admin.CategoryServiceImpl;
 import service.admin.ItemService;
-import service.admin.ItemServiceImpl;
-import dao.*;
-import mapper.CategoryMapper;
-import mapper.ItemMapper;
+import service.common.CategoryCache;
+import service.customer.CartService;
+import handler.customer.BookBrowseHandler;
+import service.customer.ItemServiceFactory;
+import util.contannts.*;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.sql.Connection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-public class BookBrowseServlet extends HttpServlet {
+public class BookBrowseServlet extends BaseCustomerServlet {
 
-    private ItemService itemService;
-    private CategoryService categoryService;
-    private CartItemDAO cartItemDAO;  // Add this
+    private static final Logger logger = Logger.getLogger(BookBrowseServlet.class.getName());
+
+    private BookBrowseHandler browseHandler;
 
     @Override
     public void init() throws ServletException {
         try {
             Connection conn = db.DBConnection.getInstance().getConnection();
 
-            itemService = new ItemServiceImpl(
-                new ItemDAOImpl(conn),
-                new CategoryDAOImpl(conn),
-                new ItemMapper(),
-                new DicountDAOimpl(conn),
-                new DiscountAssignmentDAOImpl(conn)
-            );
+            ItemService itemService = ItemServiceFactory.createItemService(conn);
+            CategoryService categoryService = ItemServiceFactory.createCategoryService(conn);
+            cartService = ItemServiceFactory.createCartService(conn);  // set to base class field
+            CategoryCache categoryCache = ItemServiceFactory.createCategoryCache(categoryService, getServletContext());
 
-            categoryService = new CategoryServiceImpl(
-                new CategoryDAOImpl(conn),
-                new CategoryMapper()
-            );
-
-            cartItemDAO = new CartItemDAOimpl(conn);  // Initialize here
+            browseHandler = new BookBrowseHandler(itemService, categoryCache, cartService);
 
         } catch (Exception e) {
-            throw new ServletException("Failed to initialize services", e);
+            logger.log(Level.SEVERE, "Failed to initialize services", e);
+            throw new ServletException("Service initialization failed", e);
         }
     }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
-            HttpSession session = req.getSession();
-            UserSession user = (UserSession) session.getAttribute("user");
+            UserSession user = getAuthenticatedUser(req, resp);
+            if (user == null) return; // redirected to login
 
-            if (user != null) {
-                // Load cart from DB if not present in session
-                Map<String, CartItem> cart = (Map<String, CartItem>) session.getAttribute("cart");
-                if (cart == null) {
-                    cart = new HashMap<>();
-                    List<CartItem> dbCartItems = cartItemDAO.findByCustomerId(user.getId());  // <-- Implement this DAO method
-                    for (CartItem ci : dbCartItems) {
-                        cart.put(ci.getItemId(), ci);
-                    }
-                    session.setAttribute("cart", cart);
-                }
-            }
+            ensureCartLoaded(req, user.getId());
 
-            String categoryId = req.getParameter("categoryId");
-            String searchKeyword = req.getParameter("search");
-            String minPriceStr = req.getParameter("minPrice");
-            String maxPriceStr = req.getParameter("maxPrice");
+            browseHandler.handleRequest(req, resp);
 
-            BigDecimal minPrice = (minPriceStr != null && !minPriceStr.isEmpty()) ? new BigDecimal(minPriceStr) : null;
-            BigDecimal maxPrice = (maxPriceStr != null && !maxPriceStr.isEmpty()) ? new BigDecimal(maxPriceStr) : null;
-
-            List<CategoryDTO> categories = categoryService.getAllCategories();
-            List<ItemDTO> items = itemService.searchItems(searchKeyword, categoryId, minPrice, maxPrice);
-
-            req.setAttribute("categories", categories);
-            req.setAttribute("items", items);
-            req.setAttribute("selectedCategory", categoryId);
-            req.setAttribute("searchKeyword", searchKeyword);
-            req.setAttribute("minPrice", minPriceStr);
-            req.setAttribute("maxPrice", maxPriceStr);
-
-            req.getRequestDispatcher("/customer/bookBrowse.jsp").forward(req, resp);
         } catch (Exception e) {
-            e.printStackTrace();
-            req.setAttribute("error", "Failed to load books.");
-            req.getRequestDispatcher("/error.jsp").forward(req, resp);
+            logger.log(Level.SEVERE, "Failed to process book browse request", e);
+            req.setAttribute(AttributeKeys.ERROR, "Failed to load books.");
+            req.getRequestDispatcher(PagePaths.ERROR_PAGE).forward(req, resp);
         }
     }
 }

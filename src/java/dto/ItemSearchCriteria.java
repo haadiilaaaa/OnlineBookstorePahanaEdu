@@ -1,5 +1,9 @@
 package dto;
 
+
+
+
+
 import java.math.BigDecimal;
 
 public class ItemSearchCriteria {
@@ -7,8 +11,11 @@ public class ItemSearchCriteria {
     private String categoryId;
     private BigDecimal minPrice;
     private BigDecimal maxPrice;
+    private int page = 1;
+    private int limit = 10;
 
-    // Getters and setters
+    // Getters & Setters for all fields
+
     public String getKeyword() {
         return keyword;
     }
@@ -40,4 +47,21 @@ public class ItemSearchCriteria {
     public void setMaxPrice(BigDecimal maxPrice) {
         this.maxPrice = maxPrice;
     }
+
+    public int getPage() {
+        return page;
+    }
+
+    public void setPage(int page) {
+        this.page = page;
+    }
+
+    public int getLimit() {
+        return limit;
+    }
+
+    public void setLimit(int limit) {
+        this.limit = limit;
+    }
+    
 }
