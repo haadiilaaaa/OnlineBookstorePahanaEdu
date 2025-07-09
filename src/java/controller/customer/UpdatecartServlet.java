@@ -5,17 +5,25 @@ import dao.CartItemDAO;
 import dao.CartItemDAOimpl;
 import dto.UserSession;
 
-import javax.servlet.*;
+import javax.servlet.ServletException;
 import javax.servlet.http.*;
 import java.io.IOException;
 import java.sql.Connection;
 import java.util.Map;
-import util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import db.DBConnection;
+import util.CartUtil;
 
-public class UpdatecartServlet extends HttpServlet {
+import static util.contannts.SessionKeys.*;
+import static util.contannts.ParameterKeys.*;
+import static util.contannts.PagePaths.*;
+import static util.contannts.ErrorMessages.*;
 
+public class UpdatecartServlet extends BaseCustomerServlet {
+
+    private static final Logger logger = Logger.getLogger(UpdatecartServlet.class.getName());
     private CartItemDAO cartItemDAO;
 
     @Override
@@ -23,58 +31,60 @@ public class UpdatecartServlet extends HttpServlet {
         try {
             Connection connection = DBConnection.getInstance().getConnection();
             cartItemDAO = new CartItemDAOimpl(connection);
+            this.cartService = new service.customer.CartServiceImpl(cartItemDAO);
+            logger.info("✅ UpdateCartServlet initialized successfully.");
         } catch (Exception e) {
-            throw new ServletException("DB connection error", e);
+            throw new ServletException("❌ DB connection error", e);
         }
     }
 
-   @Override
-protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-    String itemId = req.getParameter("itemId");
-    String quantityStr = req.getParameter("quantity");
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
 
-    if (itemId == null || quantityStr == null) {
-        resp.sendRedirect("cart.jsp");
-        return;
-    }
+        String itemId = req.getParameter(ITEM_ID);
+        String quantityStr = req.getParameter(QUANTITY);
 
-    int quantity;
-    try {
-        quantity = Integer.parseInt(quantityStr);
-    } catch (NumberFormatException e) {
-        quantity = 1;
-    }
-
-    HttpSession session = req.getSession(false);
-    if (session != null) {
-        UserSession userSession = (UserSession) session.getAttribute("user");
-        if (userSession == null) {
-            resp.sendRedirect("login.jsp");
+        if (itemId == null || quantityStr == null) {
+            redirectWithMessage(resp, "error", MISSING_PARAMS);
             return;
         }
+
+        int quantity;
+        try {
+            quantity = Integer.parseInt(quantityStr);
+            if (quantity < 0) quantity = 0;
+        } catch (NumberFormatException e) {
+            quantity = 0;
+        }
+
+        UserSession userSession = getAuthenticatedUser(req, resp);
+        if (userSession == null) return;
+
+        logger.info("🔁 User " + userSession.getId() + " updating item " + itemId + " to qty " + quantity);
 
         try {
             if (quantity <= 0) {
                 cartItemDAO.deleteByCustomerAndItem(userSession.getId(), itemId);
+                logger.info("🗑️ Removed item " + itemId + " from cart");
             } else {
                 cartItemDAO.updateQuantity(userSession.getId(), itemId, quantity);
+                logger.info("✅ Updated item " + itemId + " quantity to " + quantity);
             }
 
-            // Reload the cart from DB after update
-            var cartItems = cartItemDAO.findByCustomerId(userSession.getId());
+            // Refresh cart in session
+            refreshCartInSession(req, userSession.getId());
 
-            // Convert List<CartItem> to Map<String, CartItem>
-            Map<String, CartItem> cart = CartUtil.convertListToMap(cartItems);
-
-            // Update session cart attribute
-            session.setAttribute("cart", cart);
+            redirectWithMessage(resp, "success", CART_UPDATED_SUCCESSFULLY);
 
         } catch (Exception e) {
-            throw new ServletException("Failed to update cart in DB or reload cart", e);
+            logger.log(Level.SEVERE, "🛑 Failed to update cart for user " + userSession.getId(), e);
+            redirectWithMessage(resp, "error", CART_UPDATE_FAILED);
         }
     }
 
-    resp.sendRedirect("customer/cart.jsp");
-}
-
+    // Helper method to redirect with a message parameter
+    private void redirectWithMessage(HttpServletResponse resp, String type, String message) throws IOException {
+        resp.sendRedirect(CART_PAGE + "?" + type + "=" + message);
+    }
 }

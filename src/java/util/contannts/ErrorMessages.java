@@ -19,4 +19,12 @@ public class ErrorMessages {
     public static final String ASSIGNMENT_FAILED = "Failed to assign discount.";
     public static final String REMOVAL_FAILED = "Failed to remove discount assignment.";
      public static final String DASHBOARD_LOAD_FAILED = "Failed to load dashboard.";
+       public static final String BOOK_LOAD_FAILED = "Failed to load books.";
+    public static final String CART_LOAD_FAILED = "Failed to load cart data.";
+    public static final String ITEM_NOT_FOUND = "Requested item not found.";
+     public static final String MISSING_PARAMS = "missingParams";
+    public static final String CART_UPDATE_FAILED = "cartUpdateFailed";
+    public static final String CART_UPDATED_SUCCESSFULLY = "cartUpdated";
+     public static final String ITEM_REMOVED_SUCCESSFULLY = "itemRemoved";
+    public static final String ITEM_REMOVE_FAILED = "removeFailed";
 }

@@ -5,15 +5,24 @@ import dao.CartItemDAO;
 import dao.CartItemDAOimpl;
 import dto.UserSession;
 import db.DBConnection;
+import util.CartUtil;
 
-import javax.servlet.*;
+import javax.servlet.ServletException;
 import javax.servlet.http.*;
 import java.io.IOException;
 import java.sql.Connection;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-public class RemoveCartItemServlet extends HttpServlet {
+import static util.contannts.SessionKeys.*;
+import static util.contannts.ParameterKeys.*;
+import static util.contannts.PagePaths.*;
+import static util.contannts.ErrorMessages.*;
 
+public class RemoveCartItemServlet extends BaseCustomerServlet {
+
+    private static final Logger logger = Logger.getLogger(RemoveCartItemServlet.class.getName());
     private CartItemDAO cartItemDAO;
 
     @Override
@@ -21,39 +30,36 @@ public class RemoveCartItemServlet extends HttpServlet {
         try {
             Connection connection = DBConnection.getInstance().getConnection();
             cartItemDAO = new CartItemDAOimpl(connection);
+            this.cartService = new service.customer.CartServiceImpl(cartItemDAO); // From base class
+            logger.info("✅ RemoveCartItemServlet initialized successfully.");
         } catch (Exception e) {
+            logger.log(Level.SEVERE, "❌ Failed to initialize RemoveCartItemServlet", e);
             throw new ServletException("DB connection error", e);
         }
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String itemId = req.getParameter("itemId");
+protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+        throws ServletException, IOException {
 
-        HttpSession session = req.getSession(false);
-        if (session == null) {
-            resp.sendRedirect(req.getContextPath() + "/login.jsp");
-            return;
-        }
+    String itemId = req.getParameter(ITEM_ID);
 
-        UserSession userSession = (UserSession) session.getAttribute("user");
-        if (userSession == null) {
-            resp.sendRedirect(req.getContextPath() + "/login.jsp");
-            return;
-        }
+    UserSession userSession = getAuthenticatedUser(req, resp);
+    if (userSession == null) return;
 
-        Map<String, CartItem> cart = (Map<String, CartItem>) session.getAttribute("cart");
+    try {
+        cartItemDAO.deleteByCustomerAndItem(userSession.getId(), itemId);
+        logger.info("🗑️ Removed item " + itemId + " from DB cart for user " + userSession.getId());
 
-        if (cart != null) {
-            cart.remove(itemId);
-            session.setAttribute("cart", cart);
-            try {
-                cartItemDAO.deleteByCustomerAndItem(userSession.getId(), itemId);
-            } catch (Exception e) {
-                throw new ServletException("Failed to remove cart item from DB", e);
-            }
-        }
+        // Use refactored method
+        refreshCartInSession(req, userSession.getId());
 
-        resp.sendRedirect(req.getContextPath() + "/customer/cart.jsp");
+        resp.sendRedirect(CART_PAGE + "?success=" + ITEM_REMOVED_SUCCESSFULLY);
+
+    } catch (Exception e) {
+        logger.log(Level.SEVERE, "🛑 Failed to remove cart item", e);
+        resp.sendRedirect(CART_PAGE + "?error=" + ITEM_REMOVE_FAILED);
     }
+}
+
 }
