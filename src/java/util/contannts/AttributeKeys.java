@@ -15,6 +15,12 @@ public class AttributeKeys {
     public static final String DISCOUNTS = "discounts";
     public static final String DISCOUNT_ASSIGNMENTS_MAP = "discountAssignmentsMap";
    
+    public static final String SELECTED_CATEGORY = "selectedCategory";
+    public static final String SEARCH_KEYWORD = "searchKeyword";
+    public static final String MIN_PRICE = "minPrice";
+    public static final String MAX_PRICE = "maxPrice";
+     public static final String CSRF_TOKEN = "csrfToken"; // ✅ Add this
+   
     
 
     

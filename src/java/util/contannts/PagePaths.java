@@ -22,6 +22,7 @@ public class PagePaths {
     // ✅ New: Discount management
     public static final String MANAGE_DISCOUNTS_PAGE = "/admin/manageDiscounts.jsp";
     public static final String MANAGE_DISCOUNTS_SERVLET = "ManageDiscountServlet";
+     public static final String CUSTOMER_DASHBOARD_PAGE = "/customer/customerDashboard.jsp";
 }
 
     

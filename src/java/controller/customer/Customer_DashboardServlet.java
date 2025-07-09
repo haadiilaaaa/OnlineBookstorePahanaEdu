@@ -1,106 +1,73 @@
 package controller.customer;
 
-import dao.*;
-import db.DBConnection;
 import dto.CustomerDashboardDTO;
 import dto.UserSession;
 import model.CartItem;
-import model.Item;
 import service.customer.CustomerDashboardService;
-import service.customer.CustomerDashboardServiceImpl;
-import service.customer.CustomerDiscountService;
-import dao.CategoryDAO;
-import dao.CategoryDAOImpl;
+import util.CartUtil;
+import util.csrf.CSRFTokenUtil;
+import util.contannts.*;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.sql.Connection;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import model.Category;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Customer_DashboardServlet extends HttpServlet {
 
+    private static final Logger LOGGER = Logger.getLogger(Customer_DashboardServlet.class.getName());
     private CustomerDashboardService dashboardService;
-    private CustomerDiscountService discountService;
-    private ItemDAO itemDAO;
 
     @Override
     public void init() throws ServletException {
-        try {
-            Connection connection = DBConnection.getInstance().getConnection();
-            CustomerDAO customerDAO = new CustomerDAOimpl(connection);
-            CartItemDAO cartItemDAO = new CartItemDAOimpl(connection);
-            DiscountDAO discountDAO = new DicountDAOimpl(connection);
-            CategoryDAO categoryDAO = new CategoryDAOImpl(connection);
-            itemDAO = new ItemDAOImpl(connection);
-
-            dashboardService = new CustomerDashboardServiceImpl(customerDAO, cartItemDAO, discountDAO, categoryDAO);
-            discountService = new CustomerDiscountService(new DiscountAssignmentDAOImpl(connection), discountDAO);
-
-        } catch (Exception e) {
-            throw new ServletException("Failed to initialize CustomerDashboardServlet", e);
+        dashboardService = (CustomerDashboardService) getServletContext().getAttribute(ContextKeys.CUSTOMER_DASHBOARD_SERVICE);
+        if (dashboardService == null) {
+            throw new ServletException("CustomerDashboardService not initialized in ServletContext.");
         }
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
         HttpSession session = request.getSession(false);
-        if (session == null) {
-            response.sendRedirect("login.jsp");
+        if (session == null || session.getAttribute(SessionKeys.USER) == null) {
+            response.sendRedirect(PagePaths.LOGIN_PAGE);
             return;
         }
 
-        UserSession userSession = (UserSession) session.getAttribute("user");
-        if (userSession == null) {
-            response.sendRedirect("login.jsp");
-            return;
-        }
+        UserSession userSession = (UserSession) session.getAttribute(SessionKeys.USER);
 
         try {
+            // Load dashboard data
             CustomerDashboardDTO dto = dashboardService.loadDashboard(userSession.getId());
 
-            // Apply discount on each cart item
-            if (dto != null && dto.getCartItems() != null) {
-                for (CartItem cartItem : dto.getCartItems()) {
-                    // Fetch the full item details
-                    Item item = itemDAO.findById(cartItem.getItemId());
-                    if (item != null) {
-                        // Calculate discounted price
-                        BigDecimal discountedPrice = discountService.calculateDiscountedPrice(item);
-                        cartItem.setPrice(discountedPrice);
-                        cartItem.setOriginalPrice(item.getPrice());
-                    }
-                }
-            }
+            // Set dashboard data and category list
+            request.setAttribute(AttributeKeys.DASHBOARD_DATA, dto);
+            request.setAttribute(AttributeKeys.CATEGORIES, dashboardService.getAllCategories());
 
-            List<Category> categories = dashboardService.getAllCategories();
+            // Set filter parameters
+            request.setAttribute(AttributeKeys.SELECTED_CATEGORY, request.getParameter(ParameterKeys.CATEGORY_ID));
+            request.setAttribute(AttributeKeys.SEARCH_KEYWORD, request.getParameter(ParameterKeys.SEARCH));
+            request.setAttribute(AttributeKeys.MIN_PRICE, request.getParameter(ParameterKeys.MIN_PRICE));
+            request.setAttribute(AttributeKeys.MAX_PRICE, request.getParameter(ParameterKeys.MAX_PRICE));
 
-            request.setAttribute("dashboardData", dto);
-            request.setAttribute("categories", categories);
+            // Set cart map into session using CartUtil
+            Map<String, CartItem> cartMap = CartUtil.convertListToMap(dto.getCartItems());
+            session.setAttribute(SessionKeys.CART, cartMap);
 
-            // Optional filters
-            request.setAttribute("selectedCategory", request.getParameter("categoryId"));
-            request.setAttribute("searchKeyword", request.getParameter("search"));
-            request.setAttribute("minPrice", request.getParameter("minPrice"));
-            request.setAttribute("maxPrice", request.getParameter("maxPrice"));
+            // Generate CSRF token and pass to JSP
+            String csrfToken = CSRFTokenUtil.generateToken(session);
+            request.setAttribute(AttributeKeys.CSRF_TOKEN, csrfToken);
 
-            if (dto != null && dto.getCartItems() != null) {
-                Map<String, CartItem> cartMap = new HashMap<>();
-                for (CartItem item : dto.getCartItems()) {
-                    cartMap.put(item.getItemId(), item);
-                }
-                session.setAttribute("cart", cartMap);
-            }
+            request.getRequestDispatcher(PagePaths.CUSTOMER_DASHBOARD_PAGE).forward(request, response);
 
-            request.getRequestDispatcher("/customer/customerDashboard.jsp").forward(request, response);
         } catch (Exception e) {
-            e.printStackTrace();
-            request.setAttribute("error", "Failed to load dashboard.");
-            request.getRequestDispatcher("/error.jsp").forward(request, response);
+            LOGGER.log(Level.SEVERE, "Failed to load customer dashboard", e);
+            request.setAttribute("error", ErrorMessages.DASHBOARD_LOAD_FAILED);
+            request.getRequestDispatcher(PagePaths.ERROR_PAGE).forward(request, response);
         }
     }
 }

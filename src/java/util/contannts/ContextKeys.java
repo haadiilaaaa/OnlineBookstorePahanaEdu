@@ -10,4 +10,5 @@ public class ContextKeys {
 
     // Add item service key if needed
     public static final String ITEM_SERVICE = "ItemService";
+    public static final String CUSTOMER_DASHBOARD_SERVICE = "CustomerDashboardService";
 }

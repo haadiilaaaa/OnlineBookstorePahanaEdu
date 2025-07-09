@@ -15,6 +15,7 @@ import model.Customer;
 import model.Discount;
 import dao.*;
 import db.DBConnection;
+import model.Item;
 
 
 
@@ -24,57 +25,52 @@ public class CustomerDashboardServiceImpl implements CustomerDashboardService {
     private final CustomerDAO customerDAO;
     private final CartItemDAO cartItemDAO;
     private final DiscountDAO discountDAO;
-    private final CategoryDAO categoryDAO;  // You need this DAO injected
+    private final CategoryDAO categoryDAO;
+    private final CustomerDiscountService discountService;
+    private final ItemDAO itemDAO;
 
-    // Update constructor to accept CategoryDAO
-    public CustomerDashboardServiceImpl(CustomerDAO customerDAO, CartItemDAO cartItemDAO, DiscountDAO discountDAO, CategoryDAO categoryDAO) {
+    public CustomerDashboardServiceImpl(CustomerDAO customerDAO, CartItemDAO cartItemDAO, DiscountDAO discountDAO,
+                                        CategoryDAO categoryDAO, CustomerDiscountService discountService,
+                                        ItemDAO itemDAO) {
         this.customerDAO = customerDAO;
         this.cartItemDAO = cartItemDAO;
         this.discountDAO = discountDAO;
         this.categoryDAO = categoryDAO;
+        this.discountService = discountService;
+        this.itemDAO = itemDAO;
     }
 
-@Override
-public CustomerDashboardDTO loadDashboard(String customerId) throws Exception {
-    System.out.println("🔍 Loading dashboard for customer ID: " + customerId);
-    Customer customer = customerDAO.findById(customerId);
-    System.out.println("🔍 Customer found: " + (customer != null));
-    List<CartItem> cartItems = cartItemDAO.findByCustomerId(customerId);
-    System.out.println("🛒 Cart items loaded: " + (cartItems != null ? cartItems.size() : 0));
+    @Override
+    public CustomerDashboardDTO loadDashboard(String customerId) throws Exception {
+        Customer customer = customerDAO.findById(customerId);
+        if (customer == null) throw new IllegalArgumentException("Customer not found");
 
-    // Setup discount service
-    CustomerDiscountService discountService = new CustomerDiscountService(
-        new DiscountAssignmentDAOImpl(DBConnection.getInstance().getConnection()),
-        new DicountDAOimpl(DBConnection.getInstance().getConnection())
-    );
+        List<CartItem> cartItems = cartItemDAO.findByCustomerId(customerId);
+        BigDecimal cartTotal = BigDecimal.ZERO;
 
-    BigDecimal cartTotal = BigDecimal.ZERO;
-
-    for (CartItem item : cartItems) {
-        model.Item fullItem = new ItemDAOImpl(DBConnection.getInstance().getConnection()).findById(item.getItemId());
-
-        if (fullItem != null) {
-            BigDecimal discountedPrice = discountService.calculateDiscountedPrice(fullItem);
-
-            item.setPrice(discountedPrice);  // Set discounted price to cart item
-            cartTotal = cartTotal.add(discountedPrice.multiply(BigDecimal.valueOf(item.getQuantity())));
+        for (CartItem cartItem : cartItems) {
+            Item item = itemDAO.findById(cartItem.getItemId());
+            if (item != null) {
+                BigDecimal discountedPrice = discountService.calculateDiscountedPrice(item);
+                cartItem.setPrice(discountedPrice);
+                cartItem.setOriginalPrice(item.getPrice());
+                cartTotal = cartTotal.add(discountedPrice.multiply(BigDecimal.valueOf(cartItem.getQuantity())));
+            }
         }
+
+        List<Category> categories = categoryDAO.findAll();
+
+        CustomerDashboardDTO dto = new CustomerDashboardDTO();
+        dto.setCustomerName(customer.getFirstName() + " " + customer.getLastName());
+        dto.setEmail(customer.getEmail());
+        dto.setContact(customer.getContactNumber());
+        dto.setCartItems(cartItems);
+        dto.setCartTotal(cartTotal);
+        dto.setActiveDiscounts(discountDAO.findAll());
+        dto.setCartItemCount(cartItems.size());
+
+        return dto;
     }
-
-    List<Discount> discounts = discountDAO.findAll();
-    System.out.println("🎁 Discounts loaded: " + (discounts != null ? discounts.size() : 0));
-
-    CustomerDashboardDTO dto = new CustomerDashboardDTO();
-    dto.setCustomerName(customer.getFirstName() + " " + customer.getLastName());
-    dto.setEmail(customer.getEmail());
-    dto.setContact(customer.getContactNumber());
-    dto.setCartItems(cartItems);
-    dto.setCartTotal(cartTotal);
-    dto.setActiveDiscounts(discounts);
-    dto.setCartItemCount(cartItems != null ? cartItems.size() : 0);
-
-    return dto;
-}
 
     @Override
     public List<Category> getAllCategories() throws Exception {

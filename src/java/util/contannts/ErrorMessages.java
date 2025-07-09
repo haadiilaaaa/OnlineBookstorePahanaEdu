@@ -18,4 +18,5 @@ public class ErrorMessages {
     public static final String DISCOUNT_CREATION_FAILED = "Discount creation failed.";
     public static final String ASSIGNMENT_FAILED = "Failed to assign discount.";
     public static final String REMOVAL_FAILED = "Failed to remove discount assignment.";
+     public static final String DASHBOARD_LOAD_FAILED = "Failed to load dashboard.";
 }

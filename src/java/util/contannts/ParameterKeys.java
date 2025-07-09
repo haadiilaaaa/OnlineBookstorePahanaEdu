@@ -30,4 +30,8 @@ public class ParameterKeys {
       public static final String ACTION_CREATE = "create";
     public static final String ACTION_ASSIGN = "assign";
     public static final String ACTION_REMOVE_ASSIGNMENT = "removeAssignment";
+    
+    public static final String SEARCH = "search";
+    public static final String MIN_PRICE = "minPrice";
+    public static final String MAX_PRICE = "maxPrice";
 }

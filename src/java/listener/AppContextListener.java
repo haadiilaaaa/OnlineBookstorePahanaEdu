@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.Map;
 import strategy.admin.item.*;
 
-
 import com.mysql.cj.jdbc.AbandonedConnectionCleanupThread;
 
 @WebListener
@@ -36,139 +35,112 @@ public class AppContextListener implements ServletContextListener {
         try {
             Connection connection = DBConnection.getInstance().getConnection();
 
-            // Initialize DAOs for user services
+            // === DAO INITIALIZATION ===
             CustomerDAO customerDAO = new CustomerDAOimpl(connection);
             AdminDAO adminDAO = new AminDAOImpl(connection);
             StaffDAO staffDAO = new StaffDAOImpl(connection);
             OtpTokenDAO otpDAO = new OtpTokenDAOImpl(connection);
+            CartItemDAO cartItemDAO = new CartItemDAOimpl(connection);
+            DiscountDAO discountDAO = new DicountDAOimpl(connection);
+            DiscountAssignmentDAO discountAssignmentDAO = new DiscountAssignmentDAOImpl(connection);
+            CategoryDAO categoryDAO = new CategoryDAOImpl(connection);
+            ItemDAO itemDAO = new ItemDAOImpl(connection);
 
-            // Common services
+            // === COMMON SERVICES ===
             InputValidationService inputValidationService = new InputValidationServiceImpl();
-
             OtpSender otpEmailService = EmailServiceFactory.createOtpEmailService();
             EmailSender generalEmailService = EmailServiceFactory.createGeneralEmailService();
-
             OtpSendServiceImpl otpService = new OtpSendServiceImpl(otpDAO, otpEmailService);
             GlobalUserValidator globalValidator = new GlobalUserValidator(customerDAO, adminDAO, staffDAO);
 
-            // Customer registration service and strategy
-            RegisterCustomerService customerService =
-                new RegisterCustomerServiceImpl(customerDAO, inputValidationService, otpService, globalValidator);
-            RegistrationStrategy customerStrategy = new CustomerStrategy(customerService);
+            // === REGISTRATION STRATEGIES ===
+            RegisterCustomerService customerService = new RegisterCustomerServiceImpl(
+                    customerDAO, inputValidationService, otpService, globalValidator);
+            RegisterServiceAdmin adminService = new RegisterAdminServiceImpl(
+                    adminDAO, inputValidationService, otpService, globalValidator);
+            RegisterStaffService staffService = new RegisterStaffServiceImpl(
+                    staffDAO, inputValidationService, otpService, globalValidator);
 
-            // Admin registration service and strategy
-            RegisterServiceAdmin adminService =
-                new RegisterAdminServiceImpl(adminDAO, inputValidationService, otpService, globalValidator);
-            RegistrationStrategy adminStrategy = new AdminStrategy(adminService);
-
-            // Staff registration service and strategy
-            RegisterStaffService staffService =
-                new RegisterStaffServiceImpl(staffDAO, inputValidationService, otpService, globalValidator);
-            RegistrationStrategy staffStrategy = new StaffStrategy(staffService);
-
-            // Register all registration strategies
             StrategyContext strategyContext = new StrategyContext();
-            strategyContext.addStrategy("customer", customerStrategy);
-            strategyContext.addStrategy("admin", adminStrategy);
-            strategyContext.addStrategy("staff", staffStrategy);
+            strategyContext.addStrategy("customer", new CustomerStrategy(customerService));
+            strategyContext.addStrategy("admin", new AdminStrategy(adminService));
+            strategyContext.addStrategy("staff", new StaffStrategy(staffService));
 
-            // Save shared services to servlet context
+            // === STORE STRATEGY CONTEXT ===
             sce.getServletContext().setAttribute("StrategyContext", strategyContext);
             sce.getServletContext().setAttribute("GeneralEmailService", generalEmailService);
 
-            // === OTP Verification Service and Redirect Strategies setup ===
-            
-             Map<String, UserVerificationStrategy> userVerificationStrategies = new HashMap<>();
-userVerificationStrategies.put("customer", new CustomerVerificationStrategy(customerDAO));
-userVerificationStrategies.put("admin", new AdminVerificationStrategy(adminDAO));
-userVerificationStrategies.put("staff", new StaffVerificationStrategy(staffDAO));
+            // === OTP VERIFICATION STRATEGIES ===
+            Map<String, UserVerificationStrategy> userVerificationStrategies = new HashMap<>();
+            userVerificationStrategies.put("customer", new CustomerVerificationStrategy(customerDAO));
+            userVerificationStrategies.put("admin", new AdminVerificationStrategy(adminDAO));
+            userVerificationStrategies.put("staff", new StaffVerificationStrategy(staffDAO));
+            UserVerificationStrategyContext verificationStrategyContext = new UserVerificationStrategyContext(userVerificationStrategies);
 
-UserVerificationStrategyContext verificationStrategyContext = new UserVerificationStrategyContext(userVerificationStrategies);
+            // === OTP VERIFICATION SERVICE ===
+            OtpVerificationService otpVerificationService = new OtpVerificationServiceImpl(otpDAO, verificationStrategyContext);
+            sce.getServletContext().setAttribute("OtpVerificationService", otpVerificationService);
 
-            // === OTP Verification Service ===
-          OtpVerificationService otpVerificationService = new OtpVerificationServiceImpl(
-        otpDAO, verificationStrategyContext);
-
-// Register it in the servlet context so the servlet can get it
-sce.getServletContext().setAttribute("OtpVerificationService", otpVerificationService);
-
-
-            // === OTP Redirect Strategies ===
+            // === OTP REDIRECT STRATEGIES ===
             Map<String, OtpRedirectStrategy> otpRedirectStrategies = new HashMap<>();
             otpRedirectStrategies.put("customer", new CustomerOtpRedirectStrategy());
             otpRedirectStrategies.put("admin", new AdminOtpRedirectStrategy());
             otpRedirectStrategies.put("staff", new StaffOtpRedirectStrategy());
-            
-
-            // 5. Save OTP redirect strategies map in servlet context
             sce.getServletContext().setAttribute("OtpRedirectStrategies", otpRedirectStrategies);
 
-            // === New: create and register admin/item services ===
-             // === Add this block to initialize and register AdminDashboardService ===
-        try {
-            System.out.println("Registering AdminDashoardService...");
-            AdminDashoardService adminDashboardService = AdminDashboardServiceFactory.createDashboardService(connection);
-            System.out.println("AdminDashoardService created: " + adminDashboardService);
-            sce.getServletContext().setAttribute("AdminDashoardService", adminDashboardService);
-            System.out.println("✅ AdminDashboardService registered in ServletContext.");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        
-        try {
-    AdminOrderService adminOrderService = AdminOrderServicefactory.createAdminOrderService(connection);
-    sce.getServletContext().setAttribute("AdminOrderService", adminOrderService);
-    System.out.println("✅ AdminOrderService registered in ServletContext.");
-} catch (Exception e) {
-    System.err.println("❌ Failed to initialize AdminOrderService.");
-    e.printStackTrace();
-}
+            // === ADMIN DASHBOARD SERVICE ===
+            try {
+                AdminDashoardService adminDashboardService = AdminDashboardServiceFactory.createDashboardService(connection);
+                sce.getServletContext().setAttribute("AdminDashoardService", adminDashboardService);
+                System.out.println("✅ AdminDashboardService registered.");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
+            // === ADMIN ORDER SERVICE ===
+            try {
+                AdminOrderService adminOrderService = AdminOrderServicefactory.createAdminOrderService(connection);
+                sce.getServletContext().setAttribute("AdminOrderService", adminOrderService);
+                System.out.println("✅ AdminOrderService registered.");
+            } catch (Exception e) {
+                System.err.println("❌ Failed to initialize AdminOrderService.");
+                e.printStackTrace();
+            }
 
-            // DAOs needed by ItemService
-            ItemDAO itemDAO = new ItemDAOImpl(connection);
-            CategoryDAO categoryDAO = new CategoryDAOImpl(connection);
-
-            // Mappers needed by services
+            // === ITEM & CATEGORY SERVICES ===
             ItemMapper itemMapper = new ItemMapper();
             CategoryMapper categoryMapper = new CategoryMapper();
 
-            DiscountDAO discountDAO = new DicountDAOimpl(connection);
-            DiscountAssignmentDAO discountAssignmentDAO = new DiscountAssignmentDAOImpl(connection);
-
-            // Create services with dependencies
-            ItemService itemService = new ItemServiceImpl(itemDAO, categoryDAO, itemMapper, discountDAO,
-                    discountAssignmentDAO);
+            ItemService itemService = new ItemServiceImpl(itemDAO, categoryDAO, itemMapper, discountDAO, discountAssignmentDAO);
             CategoryService categoryService = new CategoryServiceImpl(categoryDAO, categoryMapper);
 
-          // after you create itemService and categoryService
-sce.getServletContext().setAttribute("ItemService", itemService);
-sce.getServletContext().setAttribute("CategoryService", categoryService);
-// After creating categoryService:
-CategoryCommandFactory categoryCommandFactory = new CategoryCommandFactory(categoryService);
-sce.getServletContext().setAttribute("CategoryCommandFactory", categoryCommandFactory);
-System.out.println("✅ CategoryCommandFactory registered in ServletContext.");
+            sce.getServletContext().setAttribute("ItemService", itemService);
+            sce.getServletContext().setAttribute("CategoryService", categoryService);
 
+            CategoryCommandFactory categoryCommandFactory = new CategoryCommandFactory(categoryService);
+            sce.getServletContext().setAttribute("CategoryCommandFactory", categoryCommandFactory);
+            System.out.println("✅ CategoryCommandFactory registered.");
 
-// still register in your custom service manager if needed
-AddItemServiceManager.register(ItemService.class, itemService);
-AddItemServiceManager.register(CategoryService.class, categoryService);
+            AddItemServiceManager.register(ItemService.class, itemService);
+            AddItemServiceManager.register(CategoryService.class, categoryService);
+            System.out.println("✅ ItemService & CategoryService registered in AddItemServiceManager.");
 
-            System.out.println("✅ ItemService and CategoryService registered in AddItemServiceManager.");
-            // After registering ItemService and CategoryService
-Map<String, ItemActionStrategy> itemStrategyMap = ItemStrategyRegistrar.registerAll(itemService, categoryService);
-sce.getServletContext().setAttribute("ItemStrategyMap", itemStrategyMap);
-System.out.println("✅ ItemStrategyMap registered in ServletContext.");
+            Map<String, ItemActionStrategy> itemStrategyMap = ItemStrategyRegistrar.registerAll(itemService, categoryService);
+            sce.getServletContext().setAttribute("ItemStrategyMap", itemStrategyMap);
+            System.out.println("✅ ItemStrategyMap registered.");
 
-DiscountManagementService discountManagementService = new DiscountManagementServiceImpl(
-    discountDAO,
-    discountAssignmentDAO,
-    itemDAO,
-    categoryDAO
-);
-sce.getServletContext().setAttribute("DiscountManagementService", discountManagementService);
-System.out.println("✅ DiscountManagementService registered in ServletContext.");
+            // === DISCOUNT MANAGEMENT SERVICE ===
+            DiscountManagementService discountManagementService = new DiscountManagementServiceImpl(
+                    discountDAO, discountAssignmentDAO, itemDAO, categoryDAO);
+            sce.getServletContext().setAttribute("DiscountManagementService", discountManagementService);
+            System.out.println("✅ DiscountManagementService registered.");
 
+            // === CUSTOMER DASHBOARD SERVICE ===
+            CustomerDiscountService customerDiscountService = new CustomerDiscountService(discountAssignmentDAO, discountDAO);
+            CustomerDashboardService customerDashboardService = new CustomerDashboardServiceImpl(
+                    customerDAO, cartItemDAO, discountDAO, categoryDAO, customerDiscountService, itemDAO);
+            sce.getServletContext().setAttribute("CustomerDashboardService", customerDashboardService);
+            System.out.println("✅ CustomerDashboardService registered.");
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -178,7 +150,6 @@ System.out.println("✅ DiscountManagementService registered in ServletContext."
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
         System.out.println("⚠️ AppContextListener contextDestroyed called: cleaning up resources.");
-
         Enumeration<Driver> drivers = DriverManager.getDrivers();
         while (drivers.hasMoreElements()) {
             Driver driver = drivers.nextElement();
@@ -189,7 +160,6 @@ System.out.println("✅ DiscountManagementService registered in ServletContext."
                 e.printStackTrace();
             }
         }
-
         AbandonedConnectionCleanupThread.checkedShutdown();
         System.out.println("MySQL AbandonedConnectionCleanupThread shutdown.");
     }
