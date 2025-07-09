@@ -3,5 +3,19 @@ package util.contannts;
 public class AttributeKeys {
     public static final String ERROR = "error";
     public static final String SUCCESS = "success";
+
+    public static final String CATEGORIES = "categories";
+    public static final String ITEMS = "items";
+
+    public static final String DASHBOARD_DATA = "dashboardData";
+    public static final String ORDERS = "orders";
+    public static final String ERROR_MESSAGE = "errorMessage";
+
+    // Discount specific attributes
+    public static final String DISCOUNTS = "discounts";
+    public static final String DISCOUNT_ASSIGNMENTS_MAP = "discountAssignmentsMap";
+   
+    
+
     
 }

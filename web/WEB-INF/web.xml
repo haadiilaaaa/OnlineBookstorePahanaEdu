@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app version="4.0" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee                              http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd">
-    <listener>
-        <listener-class>listener.AppContextListener</listener-class>
-    </listener>
+   <listener>
+    <listener-class>listener.AppContextListener</listener-class>
+</listener>
     <servlet>
         <servlet-name>RegisterServlet</servlet-name>
         <servlet-class>controller.RegisterServlet</servlet-class>
@@ -244,6 +244,16 @@
         <servlet-name>AdminUpdateOrderStatusServlet</servlet-name>
         <url-pattern>/AdminUpdateOrderStatusServlet</url-pattern>
     </servlet-mapping>
+    <filter>
+    <filter-name>AdminAuthorizationFilter</filter-name>
+    <filter-class>filter.AdminAuthorizationFilter</filter-class>
+</filter>
+
+<filter-mapping>
+    <filter-name>AdminAuthorizationFilter</filter-name>
+    <url-pattern>/admin/*</url-pattern> <!-- Protect all admin paths -->
+</filter-mapping>
+
     <session-config>
         <session-timeout>30</session-timeout>
     </session-config>

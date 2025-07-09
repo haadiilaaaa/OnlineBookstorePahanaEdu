@@ -21,6 +21,7 @@ import java.sql.SQLException;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import strategy.admin.item.*;
 
 
 import com.mysql.cj.jdbc.AbandonedConnectionCleanupThread;
@@ -103,6 +104,26 @@ sce.getServletContext().setAttribute("OtpVerificationService", otpVerificationSe
             sce.getServletContext().setAttribute("OtpRedirectStrategies", otpRedirectStrategies);
 
             // === New: create and register admin/item services ===
+             // === Add this block to initialize and register AdminDashboardService ===
+        try {
+            System.out.println("Registering AdminDashoardService...");
+            AdminDashoardService adminDashboardService = AdminDashboardServiceFactory.createDashboardService(connection);
+            System.out.println("AdminDashoardService created: " + adminDashboardService);
+            sce.getServletContext().setAttribute("AdminDashoardService", adminDashboardService);
+            System.out.println("✅ AdminDashboardService registered in ServletContext.");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        try {
+    AdminOrderService adminOrderService = AdminOrderServicefactory.createAdminOrderService(connection);
+    sce.getServletContext().setAttribute("AdminOrderService", adminOrderService);
+    System.out.println("✅ AdminOrderService registered in ServletContext.");
+} catch (Exception e) {
+    System.err.println("❌ Failed to initialize AdminOrderService.");
+    e.printStackTrace();
+}
+
 
             // DAOs needed by ItemService
             ItemDAO itemDAO = new ItemDAOImpl(connection);
@@ -120,11 +141,34 @@ sce.getServletContext().setAttribute("OtpVerificationService", otpVerificationSe
                     discountAssignmentDAO);
             CategoryService categoryService = new CategoryServiceImpl(categoryDAO, categoryMapper);
 
-            // Register in your service manager for retrieval by servlets
-            AddItemServiceManager.register(ItemService.class, itemService);
-            AddItemServiceManager.register(CategoryService.class, categoryService);
+          // after you create itemService and categoryService
+sce.getServletContext().setAttribute("ItemService", itemService);
+sce.getServletContext().setAttribute("CategoryService", categoryService);
+// After creating categoryService:
+CategoryCommandFactory categoryCommandFactory = new CategoryCommandFactory(categoryService);
+sce.getServletContext().setAttribute("CategoryCommandFactory", categoryCommandFactory);
+System.out.println("✅ CategoryCommandFactory registered in ServletContext.");
+
+
+// still register in your custom service manager if needed
+AddItemServiceManager.register(ItemService.class, itemService);
+AddItemServiceManager.register(CategoryService.class, categoryService);
 
             System.out.println("✅ ItemService and CategoryService registered in AddItemServiceManager.");
+            // After registering ItemService and CategoryService
+Map<String, ItemActionStrategy> itemStrategyMap = ItemStrategyRegistrar.registerAll(itemService, categoryService);
+sce.getServletContext().setAttribute("ItemStrategyMap", itemStrategyMap);
+System.out.println("✅ ItemStrategyMap registered in ServletContext.");
+
+DiscountManagementService discountManagementService = new DiscountManagementServiceImpl(
+    discountDAO,
+    discountAssignmentDAO,
+    itemDAO,
+    categoryDAO
+);
+sce.getServletContext().setAttribute("DiscountManagementService", discountManagementService);
+System.out.println("✅ DiscountManagementService registered in ServletContext.");
+
 
         } catch (Exception e) {
             e.printStackTrace();

@@ -66,6 +66,8 @@ public class LoginServlet extends HttpServlet {
 
                 HttpSession newSession = req.getSession(true);
                 newSession.setAttribute(USER, userSession);
+                    newSession.setAttribute(USER_ROLE, userSession.getUserType());
+
 
                 LoginRedirectStrategy strategy = RedirectStrategyRegistry.getStrategy(userSession.getUserType());
                 if (strategy != null) {

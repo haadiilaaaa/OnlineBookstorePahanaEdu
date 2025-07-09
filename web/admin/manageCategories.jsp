@@ -435,15 +435,16 @@ p.success {
   </div>
 </div>
 
-<c:if test="${not empty error}">
-    <p style="color: red;">${error}</p>
+<c:if test="${not empty sessionScope.successMessage}">
+    <p class="success">${sessionScope.successMessage}</p>
+    <c:remove var="successMessage" scope="session"/>
 </c:if>
-    <c:if test="${not empty sessionScope.success}">
-    <p class="success">${sessionScope.success}</p>
-    <%
-        session.removeAttribute("success");
-    %>
+
+<c:if test="${not empty sessionScope.errorMessage}">
+    <p class="error">${sessionScope.errorMessage}</p>
+    <c:remove var="errorMessage" scope="session"/>
 </c:if>
+
 
 
 <h2>Manage Categories</h2>

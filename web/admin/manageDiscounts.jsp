@@ -522,8 +522,8 @@ body.dark-mode .dark-mode-toggle {
     <p class="error">${error}</p>
 </c:if>
 
-<c:if test="${not empty sessionScope.success}">
-    <div id="toast" class="toast">${sessionScope.success}</div>
+<c:if test="${not empty sessionScope.successMessage}">
+    <div id="toast" class="toast">${sessionScope.successMessage}</div>
     <script>
         const toast = document.getElementById('toast');
         toast.classList.add('show');
@@ -531,10 +531,9 @@ body.dark-mode .dark-mode-toggle {
             toast.classList.remove('show');
         }, 3000);
     </script>
-    <%
-        session.removeAttribute("success");
-    %>
+    <c:remove var="successMessage" scope="session" />
 </c:if>
+
 
 
 <h1>Admin - Manage Discounts</h1>
