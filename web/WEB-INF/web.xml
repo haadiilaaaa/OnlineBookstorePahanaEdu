@@ -117,6 +117,10 @@
         <servlet-name>BaseCustomerServlet</servlet-name>
         <servlet-class>controller.customer.BaseCustomerServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>OrderConfirmationServlet</servlet-name>
+        <servlet-class>controller.customer.OrderConfirmationServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>RegisterServlet</servlet-name>
         <url-pattern>/RegisterServlet</url-pattern>
@@ -260,6 +264,10 @@
     <servlet-mapping>
         <servlet-name>BaseCustomerServlet</servlet-name>
         <url-pattern>/BaseCustomerServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>OrderConfirmationServlet</servlet-name>
+        <url-pattern>/OrderConfirmationServlet</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>30</session-timeout>

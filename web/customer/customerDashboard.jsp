@@ -475,6 +475,28 @@ body.dark-theme .profile-link:hover {
 .profile-text:hover {
   text-decoration: underline;
 }
+.theme-toggle-btn {
+  background: linear-gradient(135deg, var(--light-blue-2), var(--medium-blue));
+  color: var(--font-color);
+  border: none;
+  font-size: 18px;
+  padding: 10px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.theme-toggle-btn:hover {
+  background: linear-gradient(135deg, var(--medium-blue), var(--darker-blue));
+  color: white;
+  transform: rotate(15deg);
+}
+
+body.dark-theme .theme-toggle-btn {
+  background: linear-gradient(135deg, var(--darker-blue), var(--dark-bg));
+  color: var(--dark-text);
+}
 
 
   </style>
@@ -508,8 +530,8 @@ body.dark-theme .profile-link:hover {
  <nav class="nav-links" style="display: flex;  font-weight: 700;align-items:end ; font-size: 16px; color: var(--brown-dark);">
  
 <div class="profile-wrapper dropdown">
-  <a href="editCustomerProfile.jsp" class="profile-text">Profile</a>
-  <a href="editCustomerProfile.jsp" class="profile-link" title="My Profile">
+  <a href="customer/MyAccount.jsp" class="profile-text">Profile</a>
+  <a href="customer/MyAccount.jsp" class="profile-link" title="My Profile">
     <i class="fas fa-user"></i>
   </a>
 

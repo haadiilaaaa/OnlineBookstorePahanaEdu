@@ -705,6 +705,7 @@ body.dark-theme select option:focus {
     </tr>
     <c:forEach var="item" items="${items}">
         <tr>
+            
             <td>
                 <c:choose>
                     <c:when test="${not empty item.imageUrl}">
