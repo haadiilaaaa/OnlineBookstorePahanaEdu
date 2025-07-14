@@ -10,14 +10,16 @@ import java.sql.Connection;
 
 public class AdminDashboardServiceFactory {
 
-    public static AdminDashoardService createDashboardService(Connection conn) {
-        return new AdminDashboardServiceImpl(
-            new CustomerDAOimpl(conn),
-            new StaffDAOImpl(conn),
-            new ItemDAOImpl(conn),
-            new CategoryDAOImpl(conn),
-            new DicountDAOimpl(conn),
-            new AminDAOImpl(conn)
-        );
-    }
+   public static AdminDashoardService createDashboardService(Connection conn) {
+    CategoryDAO categoryDAO = new CategoryDAOImpl(conn); // ✅ create categoryDAO first
+
+    return new AdminDashboardServiceImpl(
+        new CustomerDAOimpl(conn),
+        new StaffDAOImpl(conn),
+        new ItemDAOImpl(conn), // ✅ pass both connection and categoryDAO
+        categoryDAO,
+        new DicountDAOimpl(conn),
+        new AminDAOImpl(conn)
+    );
+}
 }

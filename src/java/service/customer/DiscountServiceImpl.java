@@ -2,82 +2,94 @@ package service.customer;
 
 import dao.DiscountAssignmentDAO;
 import dao.DiscountDAO;
+import model.Discount;
+import model.DiscountAssignment;
+import model.DiscountMetaData;
 import model.Item;
-import dao.*;
-import db.DBConnection;
-import java.math.BigDecimal;
-import java.sql.Connection;
-import model.*;
-import java.util.List;
+import service.customer.discount.*;
 
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 public class DiscountServiceImpl implements DiscountService {
+    private final DiscountAssignmentDAO assignmentDAO;
+    private final DiscountDAO discountDAO;
 
-    private DiscountAssignmentDAO assignmentDAO;
-    private DiscountDAO discountDAO;
+    // Map discount types to their strategies
+    private final Map<String, DiscountStrategy> strategyMap = new HashMap<>();
 
-    public DiscountServiceImpl() {
-        // Optional: initialize with default connection
-        try {
-            Connection conn = DBConnection.getInstance().getConnection();
-            this.assignmentDAO = new DiscountAssignmentDAOImpl(conn);
-            this.discountDAO = new DicountDAOimpl(conn);
-        } catch (Exception e) {
-            throw new RuntimeException("DiscountServiceImpl init failed", e);
-        }
-    }
-
-    // Or add this too for manual injection:
     public DiscountServiceImpl(DiscountAssignmentDAO assignmentDAO, DiscountDAO discountDAO) {
         this.assignmentDAO = assignmentDAO;
         this.discountDAO = discountDAO;
+
+        // Register discount strategies
+       strategyMap.put("PERCENT", new PercentageDiscountStrategy());
+
+        // Add more strategies here if needed
     }
 
-   @Override
-public BigDecimal applyBestDiscount(Item item) throws Exception {
-    BigDecimal originalPrice = item.getPrice();
-    BigDecimal discountedPrice = originalPrice;
+    @Override
+    public BigDecimal applyBestDiscount(Item item) throws Exception {
+        if (item == null) throw new IllegalArgumentException("Item cannot be null");
 
-    Discount bestDiscount = null;
+        BigDecimal originalPrice = item.getPrice();
+        BigDecimal discountedPrice = originalPrice;
 
-    // Load all matching discount assignments
-    List<DiscountAssignment> assignments = assignmentDAO.findAssignmentsForItem(
-        item.getId(),
-        item.getCategoryId()
-    );
+        Discount bestDiscount = null;
 
-    java.util.Date now = new java.util.Date();
+        List<DiscountAssignment> assignments = assignmentDAO.findAssignmentsForItem(
+            item.getId(),
+            item.getCategoryId()
+        );
 
-    for (DiscountAssignment assignment : assignments) {
-        Discount discount = discountDAO.findById(assignment.getDiscountId());
-        if (discount != null && discount.isActive()
-                && !now.before(discount.getStartDate())
-                && !now.after(discount.getEndDate())) {
+        Date now = new Date();
 
-            if (bestDiscount == null ||
-                discount.getDiscountPercent() > bestDiscount.getDiscountPercent()) {
-                bestDiscount = discount;
+        for (DiscountAssignment assignment : assignments) {
+            Discount discount = discountDAO.findById(assignment.getDiscountId());
+            if (discount != null && discount.isActive()
+                    && !now.before(discount.getStartDate())
+                    && !now.after(discount.getEndDate())) {
+
+                if (bestDiscount == null ||
+                    discount.getDiscountPercent() > bestDiscount.getDiscountPercent()) {
+                    bestDiscount = discount;
+                }
             }
         }
+
+        DiscountMetaData meta = new DiscountMetaData();
+
+       if (bestDiscount != null) {
+    // Instead of reading discount type from DB (which doesn't exist), hardcode "PERCENT"
+    String discountType = "PERCENT";
+
+    DiscountStrategy strategy = strategyMap.get(discountType);
+    if (strategy == null) {
+        throw new IllegalStateException("No strategy found for discount type: " + discountType);
     }
 
-    // If best discount found, apply it
-    if (bestDiscount != null) {
-        BigDecimal discountAmount = originalPrice
-                .multiply(BigDecimal.valueOf(bestDiscount.getDiscountPercent()))
-                .divide(BigDecimal.valueOf(100));
+    discountedPrice = strategy.calculateDiscountedPrice(item, bestDiscount);
 
-        discountedPrice = originalPrice.subtract(discountAmount);
+    BigDecimal discountAmount = originalPrice.subtract(discountedPrice);
 
-        item.setHasDiscount(true);
-        item.setDiscountedPrice(discountedPrice);
-        item.setDiscountLabel(bestDiscount.getName());
-    } else {
-        item.setHasDiscount(false);
-        item.setDiscountedPrice(originalPrice); // fallback
-    }
-
-    return discountedPrice;
+    meta.setHasDiscount(true);
+    meta.setDiscountedPrice(discountedPrice);
+    meta.setDiscountLabel(bestDiscount.getName());
+    meta.setDiscountAmount(discountAmount);
+    meta.setDiscountType(discountType);
+} else {
+    meta.setHasDiscount(false);
+    meta.setDiscountedPrice(originalPrice);
+    meta.setDiscountAmount(BigDecimal.ZERO);
+    meta.setDiscountType(null);
+    meta.setDiscountLabel(null);
 }
 
+
+        item.setDiscount(meta);
+        return discountedPrice;
+    }
 }

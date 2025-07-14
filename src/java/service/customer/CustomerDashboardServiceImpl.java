@@ -1,25 +1,13 @@
 package service.customer;
+
 import java.math.BigDecimal;
-import dao.CartItemDAO;
-import dao.CustomerDAO;
-import dao.DiscountDAO;
-import dto.CustomerDashboardDTO;
-import model.CartItem;
-import dao.CategoryDAO;
-import dao.CustomerDAO;
-import dao.CartItemDAO;
-import dao.DiscountDAO;
-import dto.CustomerDashboardDTO;
-import model.Category;
-import model.Customer;
-import model.Discount;
-import dao.*;
-import db.DBConnection;
-import model.Item;
-
-
-
 import java.util.List;
+import java.util.Optional;
+
+import dao.*;
+import dto.CustomerDashboardDTO;
+import model.*;
+
 public class CustomerDashboardServiceImpl implements CustomerDashboardService {
 
     private final CustomerDAO customerDAO;
@@ -42,14 +30,14 @@ public class CustomerDashboardServiceImpl implements CustomerDashboardService {
 
     @Override
     public CustomerDashboardDTO loadDashboard(String customerId) throws Exception {
-        Customer customer = customerDAO.findById(customerId);
-        if (customer == null) throw new IllegalArgumentException("Customer not found");
+        Optional<Customer> customerOpt = customerDAO.findById(customerId);
+        Customer customer = customerOpt.orElseThrow(() -> new IllegalArgumentException("Customer not found"));
 
         List<CartItem> cartItems = cartItemDAO.findByCustomerId(customerId);
         BigDecimal cartTotal = BigDecimal.ZERO;
 
         for (CartItem cartItem : cartItems) {
-            Item item = itemDAO.findById(cartItem.getItemId());
+           Item item = itemDAO.findById(cartItem.getItemId());
             if (item != null) {
                 BigDecimal discountedPrice = discountService.calculateDiscountedPrice(item);
                 cartItem.setPrice(discountedPrice);
