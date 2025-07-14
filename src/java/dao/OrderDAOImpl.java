@@ -10,6 +10,7 @@ import java.sql.ResultSet;
 import java.util.List;
 import java.util.ArrayList;
 import dto.*;
+import java.util.Optional;
 
 public class OrderDAOImpl implements OrderDAO {
     private final Connection connection;
@@ -162,6 +163,28 @@ public OrderDTO findOrderWithCustomerById(String orderId) throws Exception {
     }
     return order;
 }
+@Override
+public Optional<OrderDTO> findOrderById(String orderId) throws Exception {
+    String sql = "SELECT * FROM orders WHERE id = ?";
+    try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        stmt.setString(1, orderId);
+        try (ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                OrderDTO order = new OrderDTO();
+                order.setOrderId(rs.getString("id"));
+                order.setUserId(rs.getString("customer_id"));
+                order.setShippingAddress(rs.getString("shipping_address"));
+                order.setOrderDate(rs.getTimestamp("created_at"));
+                order.setPaymentMethod(rs.getString("payment_method"));
+                order.setTotalAmount(rs.getBigDecimal("total_amount"));
+                order.setStatus(rs.getString("status"));
+                return Optional.of(order);
+            }
+        }
+    }
+    return Optional.empty();
+}
+
 
 }
 

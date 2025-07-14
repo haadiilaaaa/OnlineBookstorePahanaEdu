@@ -34,7 +34,7 @@ protected void doGet(HttpServletRequest request, HttpServletResponse response)
             CancelOrderService cancelService = new CancelOrderServiceImpl(orderDAO);
             cancelService.cancelOrder(orderId);
 
-            response.sendRedirect("customerOrderHistory"); // redirect to history page
+            response.sendRedirect("CustomerOrderHistoryServlet"); // redirect to history page
         }catch (Exception e) {
     e.printStackTrace(); // check your server logs for full trace
     System.err.println("Order ID causing error: " + orderId);

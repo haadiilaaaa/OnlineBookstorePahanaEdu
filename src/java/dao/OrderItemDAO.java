@@ -8,6 +8,7 @@ import java.sql.SQLException;
 public interface OrderItemDAO {
       int getNextOrderItemNumber() throws SQLException;
     void saveOrderItems(List<OrderItemDTO> items) throws Exception;
+     List<OrderItemDTO> findItemsByOrderId(String orderId) throws Exception;
   
 
 }

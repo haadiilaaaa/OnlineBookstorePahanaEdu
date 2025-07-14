@@ -94,6 +94,24 @@ public String getStatus() {
 public void setStatus(String status) {
     this.status = status;
 }
+private String invoiceHtml;
+private String invoiceDownloadPath;
+
+public String getInvoiceHtml() {
+    return invoiceHtml;
+}
+
+public void setInvoiceHtml(String invoiceHtml) {
+    this.invoiceHtml = invoiceHtml;
+}
+
+public String getInvoiceDownloadPath() {
+    return invoiceDownloadPath;
+}
+
+public void setInvoiceDownloadPath(String invoiceDownloadPath) {
+    this.invoiceDownloadPath = invoiceDownloadPath;
+}
 
 
     

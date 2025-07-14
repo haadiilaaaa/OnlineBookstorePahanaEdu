@@ -2,7 +2,7 @@ package dao;
 
 import dao.OrderItemDAO;
 import dto.OrderItemDTO;
-
+import java.util.ArrayList;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.List;
@@ -35,19 +35,42 @@ public class OrderItemDAOImpl implements OrderItemDAO {
             stmt.executeBatch();
         }
     }
-    
     @Override
-   public int getNextOrderItemNumber() throws SQLException {
-    String sql = "SELECT COUNT(*) AS count FROM order_items";
+public int getNextOrderItemNumber() throws SQLException {
+    String sql = "SELECT MAX(CAST(SUBSTRING(id, 4) AS UNSIGNED)) AS max_id FROM order_items";
     try (PreparedStatement stmt = connection.prepareStatement(sql);
          ResultSet rs = stmt.executeQuery()) {
         if (rs.next()) {
-            return rs.getInt("count") + 1;
+            int maxId = rs.getInt("max_id");
+            return maxId + 1;
         }
-        return 1;
+        return 1; // no entries yet
     }
 }
 
+    
+    @Override
+public List<OrderItemDTO> findItemsByOrderId(String orderId) throws Exception {
+    List<OrderItemDTO> items = new ArrayList<>();
+    String sql = "SELECT id, order_id, item_id, quantity, price FROM order_items WHERE order_id = ?";
 
+    try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        stmt.setString(1, orderId);  // Set the orderId parameter
+        try (ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                OrderItemDTO item = new OrderItemDTO();
+                item.setOrderItemId(rs.getString("id"));
+                item.setOrderId(rs.getString("order_id"));
+                item.setItemId(rs.getString("item_id"));
+                item.setQuantity(rs.getInt("quantity"));
+                item.setPrice(rs.getBigDecimal("price"));
+                items.add(item);
+            }
+        }
+    }
+    return items;
+}
 
 }
+
+
