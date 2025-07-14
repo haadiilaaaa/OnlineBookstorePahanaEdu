@@ -20,6 +20,9 @@ public class ItemDTO implements Serializable {
     private boolean hasDiscount;
     private String discountLabel;
 
+    private String discountType;        // ✅ NEW
+    private BigDecimal discountAmount;  // ✅ NEW
+
     // Getters and setters
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
@@ -59,9 +62,20 @@ public class ItemDTO implements Serializable {
 
     public String getDiscountLabel() { return discountLabel; }
     public void setDiscountLabel(String discountLabel) { this.discountLabel = discountLabel; }
-    
-    
-   
 
-    
+    public String getDiscountType() {
+        return discountType;
+    }
+
+    public void setDiscountType(String discountType) {
+        this.discountType = discountType;
+    }
+
+    public BigDecimal getDiscountAmount() {
+        return discountAmount;
+    }
+
+    public void setDiscountAmount(BigDecimal discountAmount) {
+        this.discountAmount = discountAmount;
+    }
 }
