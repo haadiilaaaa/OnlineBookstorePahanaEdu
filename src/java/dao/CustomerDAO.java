@@ -1,19 +1,22 @@
 package dao;
 
 import model.Customer;
+import java.util.Optional;
+import util.*;
 
-public interface CustomerDAO {
-    void save(Customer customer) throws Exception;
-    Customer findByEmail(String email) throws Exception;
-    Customer findByUsername(String username) throws Exception;
-    int countCustomers() throws Exception;
-     void verify(String userId) throws Exception;
-      int getMaxCustomerIdNumber() throws Exception;  // ✅ Add this method
-      Customer findById(String id) throws Exception;
-      Customer findByUsernameOrEmail(String input) throws Exception;
-      void updatePassword(String userId, String hashedPassword) throws Exception;
+public interface CustomerDAO extends GenericUserDAO<Customer>, PasswordUpdatabale {
 
+    void save(Customer customer) throws DAOExeption;
 
+    Optional<Customer> findByUsername(String username) throws DAOExeption;
 
+    int countCustomers() throws DAOExeption;
+
+    void verify(String userId) throws DAOExeption;
+
+    int getMaxCustomerIdNumber() throws DAOExeption;
+
+    Optional<Customer> findByUsernameOrEmail(String input) throws DAOExeption;
+
+    void updatePassword(String userId, String hashedPassword) throws DAOExeption;
 }
-//Data access layer for customer

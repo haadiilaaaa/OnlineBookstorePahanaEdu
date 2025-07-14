@@ -127,6 +127,24 @@ public void deleteByCustomerAndItem(String customerId, String itemId) throws Exc
             stmt.executeUpdate();
         }
     }
+    @Override
+public void addCartItem(String customerId, String itemId, int quantity, BigDecimal price) throws Exception {
+    String sql = "INSERT INTO cart_item (id, customer_id, item_id, quantity, price) VALUES (?, ?, ?, ?, ?)";
+
+    // Generate a new unique ID for cart item — you can adapt this logic:
+    int maxId = getMaxCartItemNumber();
+    String newId = "cart" + (maxId + 1);
+
+    try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        stmt.setString(1, newId);
+        stmt.setString(2, customerId);
+        stmt.setString(3, itemId);
+        stmt.setInt(4, quantity);
+        stmt.setBigDecimal(5, price);
+        stmt.executeUpdate();
+    }
+}
+
 
 
   

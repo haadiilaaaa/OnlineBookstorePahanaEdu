@@ -1,18 +1,26 @@
 package dao;
 
-import model.Admin;
 import model.Staff;
+import java.util.Optional;
+import util.DAOExeption;
 
-public interface StaffDAO {
-    void save(Staff staff) throws Exception;
-    Staff findByEmail(String email) throws Exception;
-    Staff findByUsername(String username) throws Exception;
-    int countStaff() throws Exception;
-     void verify(String userId) throws Exception;
-     int getMaxStaffIdNumber() throws Exception;  // ✅ Add this method
-     Staff findById(String id) throws Exception;
-      Staff findByUsernameOrEmail(String input) throws Exception;
-      void updatePassword(String userId, String hashedPassword) throws Exception;
+public interface StaffDAO extends GenericUserDAO<Staff>, PasswordUpdatabale {
 
+    void save(Staff staff) throws DAOExeption;
+
+    Optional<Staff> findByEmail(String email) throws DAOExeption;
+
+    Optional<Staff> findByUsername(String username) throws DAOExeption;
+
+    int countStaff() throws DAOExeption;
+
+    void verify(String userId) throws DAOExeption;
+
+    int getMaxStaffIdNumber() throws DAOExeption;
+
+    Optional<Staff> findById(String id) throws DAOExeption;
+
+    Optional<Staff> findByUsernameOrEmail(String input) throws DAOExeption;
+
+    void updatePassword(String userId, String hashedPassword) throws DAOExeption;
 }
-//staff data access layer

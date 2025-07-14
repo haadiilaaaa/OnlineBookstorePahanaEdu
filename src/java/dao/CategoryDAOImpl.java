@@ -4,7 +4,8 @@ import model.Category;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.Collections;
+import java.util.Set;
 public class CategoryDAOImpl implements CategoryDAO {
 
     private final Connection connection;
@@ -151,4 +152,35 @@ public int getLastCategoryIdNumber() throws Exception {
 }
 
 
+ @Override
+    public List<Category> findByIds(Set<String> categoryIds) throws Exception {
+        if (categoryIds == null || categoryIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        StringBuilder sql = new StringBuilder("SELECT * FROM category WHERE id IN (");
+        String placeholders = String.join(",", Collections.nCopies(categoryIds.size(), "?"));
+        sql.append(placeholders).append(")");
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql.toString())) {
+            int index = 1;
+            for (String id : categoryIds) {
+                stmt.setString(index++, id);
+            }
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                List<Category> categories = new ArrayList<>();
+                while (rs.next()) {
+                    Category category = new Category();
+                    category.setId(rs.getString("id"));
+                    category.setName(rs.getString("name"));
+                    // set other category fields as needed
+                    categories.add(category);
+                }
+                return categories;
+            }
+        }
+    }
+
+    // other existing methods...
 }

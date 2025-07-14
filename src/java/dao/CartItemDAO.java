@@ -44,6 +44,9 @@ void updateQuantity(String customerId, String itemId, int quantity) throws Excep
 void deleteByCustomerAndItem(String customerId, String itemId) throws Exception;
 void deleteCartItemsByUserId(String userId) throws Exception;
 
+// In CartItemDAO.java interface
+
+void addCartItem(String customerId, String itemId, int quantity, BigDecimal price) throws Exception;
 
 
 

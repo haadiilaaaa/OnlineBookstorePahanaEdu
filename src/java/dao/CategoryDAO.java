@@ -2,7 +2,7 @@ package dao;
 
 import model.Category;
 import java.util.List;
-
+import java.util.Set;
 public interface CategoryDAO {
     void save(Category category) throws Exception;
     List<Category> findAll() throws Exception;
@@ -14,6 +14,7 @@ void delete(String id) throws Exception;
  Category findByNameIgnoreCase(String name) throws Exception;
 void addCategory (Category category) throws Exception;
 int getLastCategoryIdNumber() throws Exception;
+ List<Category> findByIds(Set<String> categoryIds) throws Exception;
 
 
     //hi
