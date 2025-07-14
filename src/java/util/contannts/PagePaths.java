@@ -27,6 +27,11 @@ public class PagePaths {
         public static final String BOOK_BROWSE_SERVLET = "BookBrowseServlet";
         public static final String CART_PAGE = "customer/cart.jsp";
         public static final String UPDATE_CART_SERVLET = "UpdatecartServlet";
+          public static final String CHECKOUT_PAGE = "customer/checkout.jsp";
+ 
+    public static final String THANK_YOU_PAGE = "customer/thankyou.jsp";
+    public static final String ORDER_CONFIRMATION = "/OrderConfirmationServlet";
+
 
 }
 

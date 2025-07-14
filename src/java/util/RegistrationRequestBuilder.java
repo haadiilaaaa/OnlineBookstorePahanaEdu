@@ -1,50 +1,29 @@
 package util;
 
-import dto.AdminDTO;
-import dto.CustomerDTO;
-import dto.StaffDTO;
-
 import javax.servlet.http.HttpServletRequest;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class RegistrationRequestBuilder {
 
-    public static Object buildDTO(String userType, HttpServletRequest req) {
-        return switch (userType) {
-            case "customer" -> {
-                CustomerDTO dto = new CustomerDTO();
-                dto.setUsername(req.getParameter("username"));
-                dto.setFirstName(req.getParameter("first_name"));
-                dto.setLastName(req.getParameter("last_name"));
-                dto.setEmail(req.getParameter("email"));
-                dto.setContactNumber(req.getParameter("contact_number"));
-                dto.setAddress(req.getParameter("address"));
-                dto.setPassword(req.getParameter("password_hash"));
-                dto.setConfirmPassword(req.getParameter("confirm_password")); // ✅ important
-                yield dto;
-            }
-            case "admin" -> {
-                AdminDTO dto = new AdminDTO();
-                dto.setUsername(req.getParameter("username"));
-                dto.setFirstName(req.getParameter("first_name"));
-                dto.setLastName(req.getParameter("last_name"));
-                dto.setEmail(req.getParameter("email"));
-                dto.setContactNumber(req.getParameter("contact_number"));
-                dto.setPassword(req.getParameter("password_hash"));
-                dto.setConfirmPassword(req.getParameter("confirm_password")); // ✅ important
-                yield dto;
-            }
-            case "staff" -> {
-                StaffDTO dto = new StaffDTO();
-                dto.setUsername(req.getParameter("username"));
-                dto.setFirstName(req.getParameter("first_name"));
-                dto.setLastName(req.getParameter("last_name"));
-                dto.setEmail(req.getParameter("email"));
-                dto.setContactNumber(req.getParameter("contact_number"));
-                dto.setPassword(req.getParameter("password_hash"));
-                dto.setConfirmPassword(req.getParameter("confirm_password")); // ✅ important
-                yield dto;
-            }
-            default -> throw new IllegalArgumentException("Invalid user type: " + userType);
-        };
+    private static final Map<String, RequestToDTOConverter> converters = new ConcurrentHashMap<>();
+
+    static {
+        converters.put("customer", new CustomerRequestToDTOConverter());
+        converters.put("admin", new AdminRequestToDTOConverter());
+        converters.put("staff", new StaffRequestToDTOConverter());
+    }
+
+    public static Object buildDTO(String userType, HttpServletRequest request) {
+        RequestToDTOConverter converter = converters.get(userType);
+        if (converter == null) {
+            throw new IllegalArgumentException("Invalid user type: " + userType);
+        }
+        return converter.convert(request);
+    }
+
+    // Allows dynamic addition of converters to respect OCP
+    public static void registerConverter(String userType, RequestToDTOConverter converter) {
+        converters.put(userType, converter);
     }
 }

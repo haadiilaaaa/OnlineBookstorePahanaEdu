@@ -34,4 +34,5 @@ public class ParameterKeys {
     public static final String SEARCH = "search";
     public static final String MIN_PRICE = "minPrice";
     public static final String MAX_PRICE = "maxPrice";
+    public static final String QUANTITY = "quantity";
 }

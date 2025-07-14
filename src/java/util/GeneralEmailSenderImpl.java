@@ -1,8 +1,20 @@
 package util;
 
-import jakarta.mail.*;
-import jakarta.mail.internet.*;
+import jakarta.activation.DataHandler;
+import jakarta.activation.DataSource;
+import jakarta.mail.Authenticator;
+import jakarta.mail.Message;
+import jakarta.mail.PasswordAuthentication;
+import jakarta.mail.Session;
+import jakarta.mail.Transport;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeBodyPart;
+import jakarta.mail.internet.MimeMessage;
+import jakarta.mail.internet.MimeMultipart;
+import jakarta.mail.Multipart;
+import jakarta.mail.util.ByteArrayDataSource;
 import java.util.Properties;
+
 
 public class GeneralEmailSenderImpl implements EmailSender {
 
@@ -32,7 +44,7 @@ public class GeneralEmailSenderImpl implements EmailSender {
 
         Transport.send(message);
     }
-    @Override
+   @Override
 public void sendEmailWithAttachment(String to, String subject, String body, byte[] attachment, String filename) throws Exception {
     Session session = Session.getInstance(mailProperties, new Authenticator() {
         protected PasswordAuthentication getPasswordAuthentication() {
@@ -45,15 +57,15 @@ public void sendEmailWithAttachment(String to, String subject, String body, byte
     message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
     message.setSubject(subject);
 
-    // Body part
+    // Body part with HTML content
     MimeBodyPart messageBodyPart = new MimeBodyPart();
     messageBodyPart.setContent(body, "text/html");
 
-    // Attachment part
+    // Attachment part from byte array
     MimeBodyPart attachmentPart = new MimeBodyPart();
-    attachmentPart.attachFile(new java.io.File(filename));
+    DataSource dataSource = new ByteArrayDataSource(attachment, "application/pdf");
+    attachmentPart.setDataHandler(new DataHandler(dataSource));
     attachmentPart.setFileName(filename);
-    attachmentPart.setContent(attachment, "application/pdf");
 
     Multipart multipart = new MimeMultipart();
     multipart.addBodyPart(messageBodyPart);

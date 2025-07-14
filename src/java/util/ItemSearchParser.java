@@ -8,66 +8,60 @@ import java.math.BigDecimal;
 public class ItemSearchParser {
 
     public static ItemSearchCriteria parse(HttpServletRequest req) {
-        ItemSearchCriteria criteria = new ItemSearchCriteria();
+        ItemSearchCriteria.Builder builder = new ItemSearchCriteria.Builder();
 
         // Keyword
         String keyword = req.getParameter("keyword");
         if (keyword != null && !keyword.trim().isEmpty()) {
-            criteria.setKeyword(keyword.trim());
+            builder.keyword(keyword.trim());
         }
 
         // Category
         String categoryId = req.getParameter("category");
         if (categoryId != null && !categoryId.trim().isEmpty()) {
-            criteria.setCategoryId(categoryId.trim());
-        } else {
-            criteria.setCategoryId(null);
+            builder.categoryId(categoryId.trim());
         }
 
         // Min Price
         try {
             String minPriceStr = req.getParameter("minPrice");
             if (minPriceStr != null && !minPriceStr.trim().isEmpty()) {
-                criteria.setMinPrice(new BigDecimal(minPriceStr.trim()));
+                builder.minPrice(new BigDecimal(minPriceStr.trim()));
             }
         } catch (NumberFormatException e) {
-            criteria.setMinPrice(null);
+            // Ignore invalid minPrice param
         }
 
         // Max Price
         try {
             String maxPriceStr = req.getParameter("maxPrice");
             if (maxPriceStr != null && !maxPriceStr.trim().isEmpty()) {
-                criteria.setMaxPrice(new BigDecimal(maxPriceStr.trim()));
+                builder.maxPrice(new BigDecimal(maxPriceStr.trim()));
             }
         } catch (NumberFormatException e) {
-            criteria.setMaxPrice(null);
+            // Ignore invalid maxPrice param
         }
 
-        // ✅ Page
+        // Page
         try {
             String pageStr = req.getParameter("page");
             if (pageStr != null && !pageStr.trim().isEmpty()) {
                 int page = Integer.parseInt(pageStr.trim());
-                if (page > 0) {
-                    criteria.setPage(page);
-                }
+                builder.page(page);
             }
         } catch (NumberFormatException ignored) {
         }
 
-        // ✅ Limit
+        // Limit
         try {
             String limitStr = req.getParameter("limit");
             if (limitStr != null && !limitStr.trim().isEmpty()) {
                 int limit = Integer.parseInt(limitStr.trim());
-                if (limit > 0 && limit <= 100) { // optional cap
-                    criteria.setLimit(limit);
-                }
+                builder.limit(limit);
             }
         } catch (NumberFormatException ignored) {
         }
 
-        return criteria;
+        return builder.build();
     }
 }
