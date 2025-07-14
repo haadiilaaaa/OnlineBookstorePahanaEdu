@@ -1,10 +1,8 @@
 package controller;
 
-import strategy.StrategyContext;
+import service.common.RegistrationFacadeService;
 import util.ValidationException;
 import util.ErrorPageResolver;
-import util.RegistrationRequestBuilder;
-import util.UserIdExtractor;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
@@ -20,13 +18,13 @@ import static util.contannts.AttributeKeys.*;
 public class RegisterServlet extends HttpServlet {
 
     private static final Logger logger = Logger.getLogger(RegisterServlet.class.getName());
-    private StrategyContext strategyContext;
+    private RegistrationFacadeService registrationFacadeService;
 
     @Override
     public void init() throws ServletException {
-        strategyContext = (StrategyContext) getServletContext().getAttribute("StrategyContext");
-        if (strategyContext == null) {
-            throw new ServletException("StrategyContext not found.");
+        registrationFacadeService = (RegistrationFacadeService) getServletContext().getAttribute("RegistrationFacadeService");
+        if (registrationFacadeService == null) {
+            throw new ServletException("RegistrationFacadeService not found.");
         }
     }
 
@@ -36,7 +34,6 @@ public class RegisterServlet extends HttpServlet {
 
         String userType = req.getParameter(USER_TYPE);
 
-        // Null or empty userType validation
         if (userType == null || userType.isEmpty()) {
             logger.warning("User type is missing or empty.");
             req.setAttribute(ERROR, "User type is required.");
@@ -45,32 +42,20 @@ public class RegisterServlet extends HttpServlet {
         }
 
         try {
-            Object dto = RegistrationRequestBuilder.buildDTO(userType, req);
-            logger.info("Processing registration for userType: " + userType);
-
-            strategyContext.executeStrategy(userType, dto);
-
-            String userId = UserIdExtractor.extractId(userType, dto);
+            String userId = registrationFacadeService.register(userType, req);
             logger.info("Registration successful for userId: " + userId);
 
-            // Redirect to OTP verification page
             resp.sendRedirect(OTP_VERIFICATION_PAGE + "?" + USER_ID + "=" + userId + "&" + USER_TYPE + "=" + userType);
 
         } catch (ValidationException ve) {
             logger.warning("Validation failed: " + ve.getMessage());
             req.setAttribute(ERROR, ve.getMessage());
-
-            // Use ErrorPageResolver for error page path
-            String targetPage = ErrorPageResolver.resolve(userType);
-            req.getRequestDispatcher(targetPage).forward(req, resp);
+            req.getRequestDispatcher(ErrorPageResolver.resolve(userType)).forward(req, resp);
 
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Unexpected error during registration", e);
             req.setAttribute(ERROR, GENERIC_ERROR);
-
-            // fallback error page
-            String targetPage = ErrorPageResolver.resolve(userType);
-            req.getRequestDispatcher(targetPage).forward(req, resp);
+            req.getRequestDispatcher(ErrorPageResolver.resolve(userType)).forward(req, resp);
         }
     }
 }

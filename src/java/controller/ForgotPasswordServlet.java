@@ -2,15 +2,13 @@ package controller;
 
 import dao.*;
 import db.DBConnection;
-import model.PasswordResetToken;
-import service.common.PasswordResetTokenFactory;
-import service.common.UserService;
-import service.common.UserServiceImpl;
+import service.common.ForgotPasswordService;
+import service.common.ForgotPasswordServiceFactory;
 import util.EmailSender;
 import util.EmailServiceFactory;
-import util.ForgotPasswordEmailTemplateBuilder;
 import util.contannts.AttributeKeys;
 import util.contannts.PagePaths;
+import model.User;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
@@ -19,77 +17,52 @@ import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
-import dto.*;
+
 
 public class ForgotPasswordServlet extends HttpServlet {
 
     private static final Logger logger = Logger.getLogger(ForgotPasswordServlet.class.getName());
 
-    private EmailSender emailSender;
+    private ForgotPasswordService forgotPasswordService;
 
-    @Override
+     @Override
     public void init() throws ServletException {
-        try {
-            // Initialize EmailSender once, as it is stateless or manages its own resources
-            emailSender = EmailServiceFactory.createGeneralEmailService();
-        } catch (Exception e) {
-            throw new ServletException("Failed to initialize ForgotPasswordServlet", e);
+        forgotPasswordService = (ForgotPasswordService) getServletContext().getAttribute("ForgotPasswordService");
+        if (forgotPasswordService == null) {
+            throw new ServletException("ForgotPasswordService not found in ServletContext.");
         }
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
-            throws ServletException, IOException {
+protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+        throws ServletException, IOException {
 
-        String email = req.getParameter("email");
+    String email = req.getParameter("email");
 
-        if (email == null || email.isBlank()) {
-            req.setAttribute(AttributeKeys.ERROR, "Please enter your email.");
-            req.getRequestDispatcher(PagePaths.FORGOT_PASSWORD_PAGE).forward(req, resp);
-            return;
-        }
-
-        // Use try-with-resources to open and close connection per request
-        try (Connection connection = DBConnection.getInstance().getConnection()) {
-
-            // Create DAOs with this connection
-            Map<String, GenericUserDAO> daoMap = new HashMap<>();
-            daoMap.put("customer", new CustomerDAOimpl(connection));
-            daoMap.put("admin", new AminDAOImpl(connection));
-            daoMap.put("staff", new StaffDAOImpl(connection));
-
-            // Create services
-            UserService userService = new UserServiceImpl(daoMap);
-            PasswordResetTokenDAO tokenDAO = new PasswordResetTokenDAOImpl(connection);
-
-            // Use the services
-            var userOpt = userService.findUserIdAndTypeByEmail(email.trim());
-
-            if (userOpt.isEmpty()) {
-                req.setAttribute(AttributeKeys.ERROR, "No account found with that email.");
-                req.getRequestDispatcher(PagePaths.FORGOT_PASSWORD_PAGE).forward(req, resp);
-                return;
-            }
-
-            var user = userOpt.get();
-            PasswordResetToken resetToken = PasswordResetTokenFactory.createToken(user.getUserId(), user.getUserType());
-            tokenDAO.save(resetToken);
-
-            String resetLink = req.getScheme() + "://" + req.getServerName() + ":" +
-                    req.getServerPort() + req.getContextPath() + "/resetPassword.jsp?token=" + resetToken.getToken();
-
-            String subject = "Password Reset Request";
-            String message = ForgotPasswordEmailTemplateBuilder.buildResetPasswordMessage(resetLink);
-
-            emailSender.sendEmail(email, subject, message);
-
-            req.setAttribute(AttributeKeys.SUCCESS, "Password reset link has been sent to your email.");
-
-        } catch (Exception e) {
-            logger.severe("Error processing password reset: " + e.getMessage());
-            req.setAttribute(AttributeKeys.ERROR, "Error processing password reset request.");
-        }
-
+    if (email == null || email.isBlank()) {
+        req.setAttribute(AttributeKeys.ERROR, "Please enter your email.");
         req.getRequestDispatcher(PagePaths.FORGOT_PASSWORD_PAGE).forward(req, resp);
+        return;
     }
+
+    // Build base URL for reset link
+    String baseUrl = req.getScheme() + "://" + req.getServerName() + ":" + req.getServerPort() + req.getContextPath();
+
+    try {
+        boolean success = forgotPasswordService.processForgotPassword(email, baseUrl);
+
+        if (!success) {
+            req.setAttribute(AttributeKeys.ERROR, "No account found with that email.");
+        } else {
+            req.setAttribute(AttributeKeys.SUCCESS, "Password reset link has been sent to your email.");
+        }
+
+    } catch (Exception e) {
+        logger.severe("Error processing password reset: " + e.getMessage());
+        req.setAttribute(AttributeKeys.ERROR, "Error processing password reset request.");
+    }
+
+    req.getRequestDispatcher(PagePaths.FORGOT_PASSWORD_PAGE).forward(req, resp);
+}
+
 }

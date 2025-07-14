@@ -20,26 +20,30 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class BookBrowseServlet extends BaseCustomerServlet {
-
+    
     private static final Logger logger = Logger.getLogger(BookBrowseServlet.class.getName());
-
     private BookBrowseHandler browseHandler;
+
+    // Setter injection
+    public void setBrowseHandler(BookBrowseHandler handler) {
+        this.browseHandler = handler;
+    }
 
     @Override
     public void init() throws ServletException {
-        try {
-            Connection conn = db.DBConnection.getInstance().getConnection();
+        if (browseHandler == null) {
+            // Fallback to default creation if not injected
+            try {
+                Connection conn = db.DBConnection.getInstance().getConnection();
+                ItemService itemService = ItemServiceFactory.createItemService(conn);
+                CategoryService categoryService = ItemServiceFactory.createCategoryService(conn);
+                cartService = ItemServiceFactory.createCartService(conn);
+                CategoryCache categoryCache = ItemServiceFactory.createCategoryCache(categoryService, getServletContext());
 
-            ItemService itemService = ItemServiceFactory.createItemService(conn);
-            CategoryService categoryService = ItemServiceFactory.createCategoryService(conn);
-            cartService = ItemServiceFactory.createCartService(conn);  // set to base class field
-            CategoryCache categoryCache = ItemServiceFactory.createCategoryCache(categoryService, getServletContext());
-
-            browseHandler = new BookBrowseHandler(itemService, categoryCache, cartService);
-
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, "Failed to initialize services", e);
-            throw new ServletException("Service initialization failed", e);
+                browseHandler = new BookBrowseHandler(itemService, categoryCache, cartService);
+            } catch (Exception e) {
+                throw new ServletException(e);
+            }
         }
     }
 

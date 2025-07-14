@@ -70,6 +70,8 @@ public class AddItemServlet extends HttpServlet {
             throws ServletException, IOException {
         try {
             ItemAction action = ItemAction.from(req.getParameter(ParameterKeys.ACTION));
+            System.out.println("DEBUG - Action param: " + req.getParameter(ParameterKeys.ACTION));
+
             StrategyResult result = strategyExecutor.execute(action, req, resp);
             if (!resp.isCommitted()) navigate(result, req, resp);
         } catch (Exception e) {

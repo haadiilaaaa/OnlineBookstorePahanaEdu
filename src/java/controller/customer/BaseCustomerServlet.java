@@ -4,6 +4,8 @@ import dto.UserSession;
 import model.CartItem;
 import service.customer.CartService;
 
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
 import javax.servlet.http.*;
 import java.io.IOException;
 import java.util.Map;
@@ -15,6 +17,22 @@ import static util.contannts.SessionKeys.USER;
 public abstract class BaseCustomerServlet extends HttpServlet {
 
     protected CartService cartService;
+
+    // Setter for injection in tests or manual wiring
+    public void setCartService(CartService cartService) {
+        this.cartService = cartService;
+    }
+
+    @Override
+    public void init(ServletConfig config) throws ServletException {
+        super.init(config);
+        if (this.cartService == null) {
+            this.cartService = (CartService) getServletContext().getAttribute("CartService");
+            if (this.cartService == null) {
+                throw new ServletException("CartService not initialized in ServletContext");
+            }
+        }
+    }
 
     protected UserSession getAuthenticatedUser(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         HttpSession session = req.getSession(false);
@@ -33,7 +51,6 @@ public abstract class BaseCustomerServlet extends HttpServlet {
         }
     }
 
-    // ✅ NEW: Utility method to refresh cart in session
     protected void refreshCartInSession(HttpServletRequest req, String customerId) throws Exception {
         Map<String, CartItem> updatedCart = cartService.getCartMapByCustomerId(customerId);
         req.getSession().setAttribute(CART, updatedCart);
