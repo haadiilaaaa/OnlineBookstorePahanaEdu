@@ -13,9 +13,11 @@ public class InputValidationServiceImpl implements InputValidationService {
     }
 
     private String determineUserType(Object dto) throws ValidationException {
-        if (dto instanceof dto.CustomerDTO) return "customer";
-        else if (dto instanceof dto.AdminDTO) return "admin";
-        else if (dto instanceof dto.StaffDTO) return "staff";
-        else throw new ValidationException("Unsupported DTO type for validation.");
-    }
+    if (dto instanceof dto.CustomerDTO) return "customer";
+    else if (dto instanceof dto.AdminDTO) return "admin";
+    else if (dto instanceof dto.StaffDTO) return "staff";
+    else if (dto instanceof dto.DeliveryPartnerDTO) return "delivery"; // <-- Add this line
+    else throw new ValidationException("Unsupported DTO type for validation.");
+}
+
 }

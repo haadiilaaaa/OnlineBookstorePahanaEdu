@@ -6,7 +6,8 @@ import dto.StaffDTO;
 import model.Customer;
 import model.Admin;
 import model.Staff;
-
+import model.*;
+import dto.*;
 public class UserMapper {
 
     public static Customer toCustomer(CustomerDTO dto, String id, String hashedPassword) {
@@ -48,5 +49,36 @@ public class UserMapper {
         admin.setVerified(false);
         return admin;
     }
+      
+    
+    public static DeliveryPartner toDeliveryPartner(DeliveryPartnerDTO dto, String id, String passwordHash) {
+    DeliveryPartner dp = new DeliveryPartner();
+    dp.setId(id);
+    dp.setUsername(dto.getUsername());
+    dp.setFirstName(dto.getFirstName());
+    dp.setLastName(dto.getLastName());
+    dp.setEmail(dto.getEmail());
+    dp.setContactNumber(dto.getContactNumber());
+    dp.setPasswordHash(passwordHash);
+    dp.setVehicleNumber(dto.getVehicleNumber());
+    dp.setVerified(false);
+    dp.setStatus("PENDING");
+    return dp;
+}
+    
+    public static DeliveryPartnerDTO toDeliveryPartnerDTO(DeliveryPartner dp) {
+    DeliveryPartnerDTO dto = new DeliveryPartnerDTO();
+    dto.setId(dp.getId());
+    dto.setUsername(dp.getUsername());
+    dto.setFirstName(dp.getFirstName());
+    dto.setLastName(dp.getLastName());
+    dto.setEmail(dp.getEmail());
+    dto.setContactNumber(dp.getContactNumber());
+    dto.setVehicleNumber(dp.getVehicleNumber());
+    return dto;
+}
+
+
+
 }
 //user mapper class implemented

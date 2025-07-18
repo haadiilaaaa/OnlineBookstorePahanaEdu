@@ -68,14 +68,12 @@ public class OrderConfirmationServlet extends BaseCustomerServlet {
                 return;
             }
 
-            List<OrderItemDTO> items = orderItemDAO.findItemsByOrderId(orderId);
-System.out.println("Order Items for orderId " + orderId + ":");
-for (OrderItemDTO item : items) {
-    System.out.println("- " + item.getItemTitle() + " qty: " + item.getQuantity());
-}
+         List<OrderItemDTO> items = orderItemDAO.findItemsByOrderId(orderId);
 
-            // ✅ Reuse helper
-            OrderInvoiceHelper.prepareInvoiceData(req, order, user, items, invoiceService, itemDAO);
+BigDecimal deliveryFare = order.getDeliveryFare(); // NEW LINE
+
+OrderInvoiceHelper.prepareInvoiceData(req, order, user, items, invoiceService, itemDAO, deliveryFare);
+
             req.setAttribute("order", order); 
 
 

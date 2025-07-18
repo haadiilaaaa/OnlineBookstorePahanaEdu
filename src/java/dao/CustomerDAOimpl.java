@@ -8,8 +8,10 @@ import java.sql.*;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.ArrayList;
+import java.util.List;
 
-public class CustomerDAOimpl implements CustomerDAO {
+public class CustomerDAOimpl implements CustomerDAO,GenericUserDAO<Customer>, PasswordUpdatabale {
 
     private static final Logger logger = Logger.getLogger(CustomerDAOimpl.class.getName());
 
@@ -201,4 +203,98 @@ public class CustomerDAOimpl implements CustomerDAO {
         customer.setVerified(rs.getBoolean(COL_IS_VERIFIED));
         return customer;
     }
+    
+    @Override
+public void updateProfile(Customer customer, String newPasswordHash) throws DAOExeption {
+    // Base SQL updating all fields except password
+    String sql = "UPDATE " + TABLE + " SET " 
+            + COL_FIRST_NAME + " = ?, " 
+            + COL_LAST_NAME + " = ?, "
+            + COL_EMAIL + " = ?, " 
+            + COL_CONTACT_NUMBER + " = ?, " 
+            + COL_ADDRESS + " = ?";
+
+    // If new password hash is provided, include password update
+    if (newPasswordHash != null && !newPasswordHash.isEmpty()) {
+        sql += ", " + COL_PASSWORD_HASH + " = ?";
+    }
+
+    sql += " WHERE " + COL_ID + " = ?";
+
+    try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        stmt.setString(1, customer.getFirstName());
+        stmt.setString(2, customer.getLastName());
+        stmt.setString(3, customer.getEmail());
+        stmt.setString(4, customer.getContactNumber());
+        stmt.setString(5, customer.getAddress());
+
+        int index = 6;
+        if (newPasswordHash != null && !newPasswordHash.isEmpty()) {
+            stmt.setString(index++, newPasswordHash);
+        }
+        stmt.setString(index, customer.getId());
+
+        stmt.executeUpdate();
+    } catch (SQLException e) {
+        logger.log(Level.SEVERE, "Error updating customer profile", e);
+        throw new DAOExeption("Error updating customer profile.", e);
+    }
+}
+
+@Override
+public List<Customer> findAll() throws DAOExeption {
+    List<Customer> customers = new ArrayList<>();
+    String sql = "SELECT * FROM " + TABLE;
+    try (PreparedStatement stmt = connection.prepareStatement(sql);
+         ResultSet rs = stmt.executeQuery()) {
+        while (rs.next()) {
+            customers.add(extractCustomerFromResultSet(rs));
+        }
+    } catch (SQLException e) {
+        logger.log(Level.SEVERE, "Error fetching all customers", e);
+        throw new DAOExeption("Error fetching all customers.", e);
+    }
+    return customers;
+}
+
+@Override
+public boolean deleteById(String customerId) throws DAOExeption {
+    String sql = "DELETE FROM customers WHERE customer_id = ?";
+    try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        stmt.setString(1, customerId);
+        int affectedRows = stmt.executeUpdate();
+        return affectedRows > 0;
+    } catch (SQLException e) {
+        throw new DAOExeption("Error deleting customer with ID: " + customerId, e);
+    }
+}
+@Override
+public boolean update(Customer customer) throws DAOExeption {
+    String sql = "UPDATE " + TABLE + " SET "
+            + COL_FIRST_NAME + "=?, "
+            + COL_LAST_NAME + "=?, "
+            + COL_EMAIL + "=?, "
+            + COL_USERNAME + "=?, "
+            + COL_CONTACT_NUMBER + "=?, "
+            + COL_ADDRESS + "=? "
+            + "WHERE " + COL_ID + "=?";
+
+    try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        stmt.setString(1, customer.getFirstName());
+        stmt.setString(2, customer.getLastName());
+        stmt.setString(3, customer.getEmail());
+        stmt.setString(4, customer.getUsername());
+        stmt.setString(5, customer.getContactNumber());
+        stmt.setString(6, customer.getAddress());
+        stmt.setString(7, customer.getId());
+
+        int rowsAffected = stmt.executeUpdate();
+        return rowsAffected > 0;
+    } catch (SQLException e) {
+        throw new DAOExeption("Failed to update customer", e);
+    }
+}
+
+
+
 }

@@ -27,4 +27,6 @@ public class ErrorMessages {
     public static final String CART_UPDATED_SUCCESSFULLY = "cartUpdated";
      public static final String ITEM_REMOVED_SUCCESSFULLY = "itemRemoved";
     public static final String ITEM_REMOVE_FAILED = "removeFailed";
+     public static final String PARTNER_ASSIGN_FAILED = "Failed to assign delivery partner.";
+    public static final String INTERNAL_SERVER_ERROR = "Something went wrong. Please try again later.";
 }

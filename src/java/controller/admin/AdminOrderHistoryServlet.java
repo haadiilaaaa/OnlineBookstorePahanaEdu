@@ -6,7 +6,7 @@ import util.contannts.ErrorMessages;
 import dto.OrderDTO;
 import service.admin.AdminOrderService;
 import util.LoggerUtil;
-
+import dto.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
 import java.io.IOException;
@@ -34,17 +34,22 @@ public class AdminOrderHistoryServlet extends HttpServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+protected void doGet(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException {
+    try {
+        List<OrderDTO> orders = adminOrderService.getAllOrdersWithCustomerInfo();
+        List<DeliveryPartnerDTO> deliveryPartners = adminOrderService.getAllDeliveryPartners();
 
-        try {
-            List<OrderDTO> orders = adminOrderService.getAllOrdersWithCustomerInfo();
-            request.setAttribute(AttributeKeys.ORDERS, orders);
-            request.getRequestDispatcher(PagePaths.ADMIN_ORDER_HISTORY).forward(request, response);
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, "Error retrieving admin order history", e);
-            request.setAttribute(AttributeKeys.ERROR_MESSAGE, ErrorMessages.FAILED_TO_LOAD_ORDERS);
-            request.getRequestDispatcher(PagePaths.ERROR_PAGE).forward(request, response);
-        }
+        request.setAttribute(AttributeKeys.ORDERS, orders);
+        request.setAttribute(AttributeKeys.DELIVERY_PARTNERS, deliveryPartners);
+
+        request.getRequestDispatcher(PagePaths.ADMIN_ORDER_HISTORY).forward(request, response);
+
+    } catch (Exception e) {
+        logger.log(Level.SEVERE, "Error retrieving admin order history", e);
+        request.setAttribute(AttributeKeys.ERROR_MESSAGE, ErrorMessages.FAILED_TO_LOAD_ORDERS);
+        request.getRequestDispatcher(PagePaths.ERROR_PAGE).forward(request, response);
     }
+}
+
 }

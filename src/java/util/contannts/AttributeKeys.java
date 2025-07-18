@@ -20,6 +20,7 @@ public class AttributeKeys {
     public static final String MIN_PRICE = "minPrice";
     public static final String MAX_PRICE = "maxPrice";
      public static final String CSRF_TOKEN = "csrfToken"; // ✅ Add this
+     public static final String DELIVERY_PARTNERS = "deliveryPartners";
    
     
 

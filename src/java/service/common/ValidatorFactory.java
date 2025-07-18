@@ -13,17 +13,20 @@ public class ValidatorFactory {
         validators.put("admin", new AdminValidator());
         validators.put("staff", new StaffValidator());
         validators.put("addToCart", new AddToCartRequestValidator());
+        validators.put("delivery", new DeliveryPartnerValidator());
+
 
     }
 
-    @SuppressWarnings("unchecked")
-    public static <T> Validator<T> getValidator(String userType) {
-        Validator<T> validator = (Validator<T>) validators.get(userType);
-        if (validator == null) {
-            throw new IllegalArgumentException("No validator found for userType: " + userType);
-        }
-        return validator;
+   @SuppressWarnings("unchecked")
+public static <T> Validator<T> getValidator(String userType) {
+    Validator<?> validator = validators.get(userType);
+    if (validator == null) {
+        throw new IllegalArgumentException("No validator found for userType: " + userType);
     }
+    return (Validator<T>) validator;
+}
+
 
     public static void registerValidator(String userType, Validator<?> validator) {
         validators.put(userType, validator);

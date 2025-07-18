@@ -16,14 +16,14 @@ import java.util.List;
 public class OrderInvoiceHelper {
 
     public static void prepareInvoiceData(
-            HttpServletRequest req,
-            OrderDTO order,
-            UserSession user,
-            List<OrderItemDTO> items,
-            InvoiceService invoiceService,
-            ItemDAO itemDAO
-    ) throws Exception {
-
+        HttpServletRequest req,
+        OrderDTO order,
+        UserSession user,
+        List<OrderItemDTO> items,
+        InvoiceService invoiceService,
+        ItemDAO itemDAO,
+        BigDecimal deliveryFare  // new param
+) throws Exception {
         // ✅ Set user details from session
         order.setCustomerName(user.getFullName());
         order.setEmail(user.getEmail());
@@ -48,16 +48,18 @@ public class OrderInvoiceHelper {
         order.setItems(validItems);
 
         // ✅ Calculate total
-        BigDecimal total = validItems.stream()
-                .filter(i -> i.getPrice() != null)
-                .map(i -> i.getPrice().multiply(BigDecimal.valueOf(i.getQuantity())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+         BigDecimal itemsTotal = validItems.stream()
+            .filter(i -> i.getPrice() != null)
+            .map(i -> i.getPrice().multiply(BigDecimal.valueOf(i.getQuantity())))
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        order.setTotalAmount(total);
+    BigDecimal total = itemsTotal.add(deliveryFare != null ? deliveryFare : BigDecimal.ZERO);
+    order.setDeliveryFare(deliveryFare != null ? deliveryFare : BigDecimal.ZERO);
+    order.setTotalAmount(total);
 
-        // ✅ Generate invoice HTML
-        String invoiceHtml = invoiceService.generateInvoice(order, validItems);
-        order.setInvoiceHtml(invoiceHtml);
+    // Generate invoice HTML with delivery fare info included inside order object
+    String invoiceHtml = invoiceService.generateInvoice(order, validItems);
+    order.setInvoiceHtml(invoiceHtml);
         order.setInvoiceDownloadPath("invoices/Invoice_" + order.getOrderId() + ".pdf");
 
         // ✅ Set request attributes (used in thank_you.jsp)

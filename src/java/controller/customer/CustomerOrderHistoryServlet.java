@@ -5,7 +5,7 @@ import service.customer.CustomerOrderHistoryService;
 import service.customer.CustomerOrderHistoryServiceImpl;
 import dao.OrderDAOImpl;
 import db.DBConnection;
-
+import dao.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
 import java.io.IOException;
@@ -26,17 +26,22 @@ if (userSession == null) {
 }
 
 String customerId = userSession.getId(); // ✅ get the actual ID
+System.out.println("Finding orders for customer ID: " + customerId);
+
 System.out.println("Customer ID: " + customerId);
 
 
-        try (Connection conn = DBConnection.getInstance().getConnection()) {
-            CustomerOrderHistoryService historyService = new CustomerOrderHistoryServiceImpl(new OrderDAOImpl(conn));
-            List<OrderDTO> orders = historyService.getOrdersByCustomer(customerId);
-            request.setAttribute("orders", orders);
-            request.getRequestDispatcher("customer/customerOrderHistory.jsp").forward(request, response);
-        } catch (Exception e) {
-            e.printStackTrace();
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to load order history.");
-        }
+       try (Connection conn = DBConnection.getInstance().getConnection()) {
+    OrderItemDAO orderItemDAO = new OrderItemDAOImpl(conn); // ✅ Create the required dependency
+    OrderDAOImpl orderDAO = new OrderDAOImpl(conn, orderItemDAO); // ✅ Pass both
+    CustomerOrderHistoryService historyService = new CustomerOrderHistoryServiceImpl(orderDAO);
+    
+    List<OrderDTO> orders = historyService.getOrdersByCustomer(customerId);
+    request.setAttribute("orders", orders);
+    request.getRequestDispatcher("customer/customerOrderHistory.jsp").forward(request, response);
+} catch (Exception e) {
+    e.printStackTrace();
+    response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to load order history.");
+}
     }
 }

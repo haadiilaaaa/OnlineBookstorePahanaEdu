@@ -3,6 +3,7 @@ package dao;
 import model.Customer;
 import java.util.Optional;
 import util.*;
+import java.util.List;
 
 public interface CustomerDAO extends GenericUserDAO<Customer>, PasswordUpdatabale {
 
@@ -19,4 +20,19 @@ public interface CustomerDAO extends GenericUserDAO<Customer>, PasswordUpdatabal
     Optional<Customer> findByUsernameOrEmail(String input) throws DAOExeption;
 
     void updatePassword(String userId, String hashedPassword) throws DAOExeption;
+    
+   
+   void updateProfile(Customer customer, String newPasswordHash) throws DAOExeption;
+   
+   List<Customer> findAll() throws DAOExeption;
+
+boolean deleteById(String customerId) throws DAOExeption;
+boolean update(Customer customer) throws DAOExeption;
+
+
+
+
+
+
+
 }

@@ -538,7 +538,7 @@ body.dark-theme .theme-toggle-btn {
   <div class="dropdown-content">
     <ul style="list-style:none; padding:0; margin:0;">
       <li><a href="orders.jsp" style="color:inherit; text-decoration:none;">Orders</a></li>
-      <li><a href="editCustomerProfile.jsp" style="color:inherit; text-decoration:none;">Account Details</a></li>
+      <li><a href="customer/customerEditProfile.jsp" style="color:inherit; text-decoration:none;">Account Details</a></li>
       <li><a href="addresses.jsp" style="color:inherit; text-decoration:none;">Addresses</a></li>
       <li><a href="logout" style="color:inherit; text-decoration:none;">Logout</a></li>
     </ul>
@@ -582,7 +582,7 @@ body.dark-theme .theme-toggle-btn {
 <div class="links-bar">
   <a href="BookBrowseServlet">Browse Books</a> |
   <a href="about.jsp">About Us</a> |
-  <a href="guidelines.jsp">Guidelines</a> |
+  <a href="CustomerGuidelinesServlet">Guidelines</a> |
   <div class="dropdown">
     <a href="CustomerOrderHistoryServlet">My Orders ▾</a>
 

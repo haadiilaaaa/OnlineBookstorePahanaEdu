@@ -29,10 +29,12 @@ public class ResendOtpServlet extends HttpServlet {
         try {
             Connection connection = DBConnection.getInstance().getConnection();
 
-           Map<String, GenericUserDAO<? extends User>> daoMap = new HashMap<>();
-           daoMap.put(UserType.CUSTOMER.getValue(), (GenericUserDAO<? extends User>) new CustomerDAOimpl(connection));
-daoMap.put(UserType.ADMIN.getValue(), (GenericUserDAO<? extends User>) new AminDAOImpl(connection));
-daoMap.put(UserType.STAFF.getValue(), (GenericUserDAO<? extends User>) new StaffDAOImpl(connection));
+       Map<String, GenericUserDAO<? extends User>> daoMap = new HashMap<>();
+daoMap.put(UserType.CUSTOMER.getValue(), new CustomerDAOimpl(connection));
+daoMap.put(UserType.ADMIN.getValue(), new AminDAOImpl(connection));
+daoMap.put(UserType.STAFF.getValue(), new StaffDAOImpl(connection));
+daoMap.put(UserType.DELIVERY.getValue(), new DeliveryPartnerDAOImpl(connection)); // ✅ Add this
+
 
 
             userService = new UserServiceImpl(Collections.unmodifiableMap(daoMap));

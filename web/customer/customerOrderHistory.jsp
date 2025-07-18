@@ -667,37 +667,40 @@ body.dark-theme .item-row {
             for (OrderDTO order : orders) {
     %>
         <div class="order">
-            <p><strong>Order ID:</strong> <%= order.getOrderId() %></p>
-            <p><strong>Placed On:</strong> <%= order.getOrderDate() %></p>
-            <p><strong>Total Amount:</strong> Rs. <%= order.getTotalAmount() %></p>
-            <p><strong>Payment Method:</strong> <%= order.getPaymentMethod() %></p>
-            <p><strong>Status:</strong> <%= order.getStatus() %></p>
+    <p><strong>Order ID:</strong> <%= order.getOrderId() %></p>
+    <p><strong>Placed On:</strong> <%= order.getOrderDate() %></p>
+    <p><strong>Subtotal:</strong> Rs. <%= order.getTotalAmount().subtract(order.getDeliveryFare()) %></p>
+    <p><strong>Delivery Fare:</strong> Rs. <%= order.getDeliveryFare() %></p>
+    <p><strong>Total Amount:</strong> Rs. <%= order.getTotalAmount() %></p>
+    <p><strong>Payment Method:</strong> <%= order.getPaymentMethod() %></p>
+    <p><strong>Status:</strong> <%= order.getStatus() %></p>
 
-            <p><strong>Items:</strong></p>
-            <%
-                for (OrderItemDTO item : order.getItems()) {
-            %>
-                <div class="item-row">
-                    ? <%= item.getItemTitle() %> - Quantity: <%= item.getQuantity() %>, Price: Rs. <%= item.getPrice() %>
-                </div>
-            <%
-                }
-            %>
-
-            <br/>
-
-           <% if ("PENDING".equals(order.getStatus())) { %>
-                <form action="CancelOrderServlet" method="post">
-                    <input type="hidden" name="orderId" value="<%= order.getOrderId() %>">
-                    <button type="submit" class="cancel-btn">Cancel Order</button>
-                </form>
-           <% } else if ("CANCELLED_BY_CUSTOMER".equals(order.getStatus())) { %>
-                <p style="color: red;"><strong>Cancelled</strong></p>
-           <% } else if ("DELIVERED".equals(order.getStatus())) { %>
-                <p style="color: green;"><strong>Delivered</strong></p>
-           <% } %>
-
+    <p><strong>Items:</strong></p>
+    <%
+        for (OrderItemDTO item : order.getItems()) {
+    %>
+        <div class="item-row">
+            ? <%= item.getItemTitle() %> - Quantity: <%= item.getQuantity() %>, Price: Rs. <%= item.getPrice() %>
         </div>
+    <%
+        }
+    %>
+
+    <br/>
+
+   <% if ("PENDING".equals(order.getStatus())) { %>
+        <form action="CancelOrderServlet" method="post">
+            <input type="hidden" name="orderId" value="<%= order.getOrderId() %>">
+            <button type="submit" class="cancel-btn">Cancel Order</button>
+        </form>
+   <% } else if ("CANCELLED_BY_CUSTOMER".equals(order.getStatus())) { %>
+        <p style="color: red;"><strong>Cancelled</strong></p>
+   <% } else if ("DELIVERED".equals(order.getStatus())) { %>
+        <p style="color: green;"><strong>Delivered</strong></p>
+   <% } %>
+
+</div>
+
     <%
             }
         }

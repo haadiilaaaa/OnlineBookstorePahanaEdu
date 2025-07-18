@@ -19,12 +19,8 @@ public OrderPreparationService(OrderDAO orderDAO, OrderItemDAO orderItemDAO) {
     this.orderItemDAO = orderItemDAO;
 }
 
-public OrderDTO prepareOrder(String userId,
-                             String customerName,
-                             String email,
-                             String shippingAddress,
-                             String paymentMethod,
-                             Map<String, CartItem> cart) throws Exception {
+public OrderDTO prepareOrder(String userId, String fullName, String email, String shippingAddress, String paymentMethod, Map<String, CartItem> cart, BigDecimal deliveryFare)
+ throws Exception {
 
     int nextOrderNumber = orderDAO.getNextOrderNumber();
     String orderId = IDGenerator.generateOrderId(nextOrderNumber);
@@ -51,18 +47,23 @@ public OrderDTO prepareOrder(String userId,
         orderItems.add(orderItem);
     }
 
+    // Add delivery fare to total
+    total = total.add(deliveryFare);
+
     OrderDTO order = new OrderDTO();
     order.setOrderId(orderId);
     order.setUserId(userId);
-    order.setCustomerName(customerName);
+    order.setCustomerName(fullName);  // fixed from customerName to fullName
     order.setEmail(email);
     order.setShippingAddress(shippingAddress);
     order.setOrderDate(new Date());
     order.setPaymentMethod(paymentMethod);
     order.setTotalAmount(total);
+    order.setDeliveryFare(deliveryFare); // set delivery fare here
     order.setItems(orderItems);
     order.setStatus("PENDING");
 
     return order;
 }
+
 }

@@ -2,6 +2,8 @@ package controller.customer;
 
 import dao.OrderDAO;
 import dao.OrderDAOImpl;
+import dao.OrderItemDAO;
+import dao.OrderItemDAOImpl;
 import db.DBConnection;
 import service.customer.CancelOrderService;
 import service.customer.CancelOrderServiceImpl;
@@ -29,8 +31,9 @@ protected void doGet(HttpServletRequest request, HttpServletResponse response)
 
         String orderId = request.getParameter("orderId");
 
-        try (Connection conn = DBConnection.getInstance().getConnection()) {
-            OrderDAO orderDAO = new OrderDAOImpl(conn);
+       try (Connection conn = DBConnection.getInstance().getConnection()) {
+    OrderItemDAO orderItemDAO = new OrderItemDAOImpl(conn); // ✅ Create the required dependency
+    OrderDAOImpl orderDAO = new OrderDAOImpl(conn, orderItemDAO); // ✅ Pass both
             CancelOrderService cancelService = new CancelOrderServiceImpl(orderDAO);
             cancelService.cancelOrder(orderId);
 

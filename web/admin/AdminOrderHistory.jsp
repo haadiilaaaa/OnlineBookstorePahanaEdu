@@ -1,9 +1,11 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="java.util.*, dto.OrderDTO, dto.OrderItemDTO" %>
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ page import="java.util.*, dto.OrderDTO, dto.OrderItemDTO, dto.DeliveryPartnerDTO" %>
 <%@ page session="true" %>
 
 <%
     List<OrderDTO> orders = (List<OrderDTO>) request.getAttribute("orders");
+    List<DeliveryPartnerDTO> deliveryPartners = (List<DeliveryPartnerDTO>) request.getAttribute("deliveryPartners");
 %>
 
 
@@ -147,12 +149,27 @@
 
 </head>
 <body>
+    
+    <c:if test="${not empty success}">
+    <div class="alert alert-success">${success}</div>
+</c:if>
+
+<c:if test="${not empty errorMessage}">
+    <div class="alert alert-danger">${errorMessage}</div>
+</c:if>
+
     <h1>Admin Order Management</h1>
 
     <% if (orders == null || orders.isEmpty()) { %>
         <p>No orders found.</p>
     <% } else {
         for (OrderDTO order : orders) {
+            String status = order.getStatus();
+            boolean canDeliver = "PENDING".equals(status);
+            boolean isCancelledByCustomer = "CANCELLED_BY_CUSTOMER".equals(status);
+            boolean isDelivered = "DELIVERED".equals(status);
+            boolean isCancelledByAdmin = "CANCELLED_BY_ADMIN".equals(status);
+            String currentPartnerId = order.getDeliveryPartnerId();
     %>
     <div class="order">
         <p><strong>Order ID:</strong> <%= order.getOrderId() %></p>
@@ -169,19 +186,32 @@
             </div>
         <% } %>
 
+        <%-- Delivery Partner Assignment --%>
         <br/>
+        <% if (canDeliver && deliveryPartners != null && !deliveryPartners.isEmpty()) { %>
+            <form action="AssignDeliveryPartnerServlet" method="post" style="margin-top: 10px;">
+                <input type="hidden" name="orderId" value="<%= order.getOrderId() %>">
+                <label for="partnerSelect_<%= order.getOrderId() %>">Assign Delivery Partner:</label>
+                <select name="partnerId" id="partnerSelect_<%= order.getOrderId() %>" required>
+                    <option value="" disabled selected>Select Partner</option>
+                    <% for (DeliveryPartnerDTO partner : deliveryPartners) { %>
+                        <option value="<%= partner.getId() %>" <%= partner.getId().equals(currentPartnerId) ? "selected" : "" %>>
+                            <%= partner.getFirstName() %> <%= partner.getLastName() %> (<%= partner.getUsername() %>)
+                        </option>
+                    <% } %>
+                </select>
+                <button type="submit" class="btn">Assign</button>
+            </form>
+        <% } else if (currentPartnerId != null) { %>
+            <p><strong>Assigned Partner ID:</strong> <%= currentPartnerId %></p>
+        <% } %>
 
-        <% String status = order.getStatus();
-           boolean canDeliver = "PENDING".equals(status);
-           boolean isCancelledByCustomer = "CANCELLED_BY_CUSTOMER".equals(status);
-           boolean isDelivered = "DELIVERED".equals(status);
-           boolean isCancelledByAdmin = "CANCELLED_BY_ADMIN".equals(status);
-        %>
-
+        <%-- Action Buttons --%>
         <form action="AdminUpdateOrderStatusServlet" method="post" style="display: inline-block;">
             <input type="hidden" name="orderId" value="<%= order.getOrderId() %>">
             <input type="hidden" name="newStatus" value="DELIVERED">
-            <button type="submit" class="btn-deliver" <%= (canDeliver ? "" : "disabled class='btn-disabled'") %> 
+            <button type="submit" class="btn-deliver" 
+                <%= (canDeliver && currentPartnerId != null ? "" : "disabled class='btn-disabled'") %> 
                 <%= (isCancelledByCustomer ? "title='Customer cancelled order'" : "") %>>
                 Mark Delivered
             </button>
@@ -195,15 +225,15 @@
             </button>
         </form>
 
+        <%-- Status Messages --%>
         <% if (isCancelledByCustomer) { %>
-            <p style="color: red;"><strong>Cancelled by Customer</strong></p>
+            <p class="status-msg red"><strong>Cancelled by Customer</strong></p>
         <% } else if (isCancelledByAdmin) { %>
-            <p style="color: red;"><strong>Cancelled by Admin</strong></p>
+            <p class="status-msg red"><strong>Cancelled by Admin</strong></p>
         <% } else if (isDelivered) { %>
-            <p style="color: green;"><strong>Delivered</strong></p>
+            <p class="status-msg green"><strong>Delivered</strong></p>
         <% } %>
     </div>
     <% }} %>
-
 </body>
 </html>

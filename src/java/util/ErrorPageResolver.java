@@ -7,6 +7,7 @@ public class ErrorPageResolver {
             case "customer" -> "customerRegister.jsp";
             case "admin" -> "AdminRegister.jsp";
             case "staff" -> "staffRegister.jsp";
+            case "delivery" -> "deliveryPartner/deliveryPartnerRegister.jsp"; // ✅ Add this line
             default -> "index.jsp";
         };
     }

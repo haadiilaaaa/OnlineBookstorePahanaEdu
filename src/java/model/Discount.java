@@ -62,4 +62,10 @@ public class Discount {
                !now.before(startDate) &&  // now >= startDate
                !now.after(endDate);       // now <= endDate
     }
+    
+    private String type; // e.g. "PERCENT", "AMOUNT", etc.
+
+public String getType() { return type; }
+public void setType(String type) { this.type = type; }
+
 }

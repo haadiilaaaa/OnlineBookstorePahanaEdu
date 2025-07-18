@@ -1,7 +1,7 @@
 package util.contannts;
 
 public class PagePaths {
-    public static final String LOGIN_PAGE = "login.jsp";
+    public static final String LOGIN_PAGE = "/login.jsp";
     public static final String CUSTOMER_DASHBOARD = "Customer_DashboardServlet";
     public static final String ADMIN_DASHBOARD = "Admin_DashboardServlet";
     public static final String STAFF_DASHBOARD = "StaffDashboardServlet";
@@ -31,9 +31,14 @@ public class PagePaths {
  
     public static final String THANK_YOU_PAGE = "customer/thankyou.jsp";
     public static final String ORDER_CONFIRMATION = "/OrderConfirmationServlet";
+    public static final String DELIVERY_PARTNER_WAITING_APPROVAL_PAGE = "/deliveryPartner/deliveryPartnerWaitingApproval.jsp";
+     public static final String DELIVERY_ASSIGNED_ORDERS = "/deliveryPartner/assignedOrders.jsp";
+
 
 
 }
+
+
 
     
     // Add more as needed

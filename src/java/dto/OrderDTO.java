@@ -113,6 +113,24 @@ public void setInvoiceDownloadPath(String invoiceDownloadPath) {
     this.invoiceDownloadPath = invoiceDownloadPath;
 }
 
+private String deliveryPartnerId;
 
-    
+public String getDeliveryPartnerId() {
+    return deliveryPartnerId;
+}
+
+public void setDeliveryPartnerId(String deliveryPartnerId) {
+    this.deliveryPartnerId = deliveryPartnerId;
+}
+
+    private BigDecimal deliveryFare;
+
+public BigDecimal getDeliveryFare() {
+    return deliveryFare;
+}
+
+public void setDeliveryFare(BigDecimal deliveryFare) {
+    this.deliveryFare = deliveryFare;
+}
+
 }

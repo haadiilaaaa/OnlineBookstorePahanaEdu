@@ -57,6 +57,7 @@ public class LoginServlet extends HttpServlet {
 
         try {
             UserSession userSession = loginService.authenticate(username, password);
+            
 
             if (userSession != null) {
                 attemptService.resetAttempts(username);

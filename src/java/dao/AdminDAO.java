@@ -1,5 +1,5 @@
 package dao;
-
+import java.util.List;
 import model.Admin;
 import util.*;
 import java.util.Optional;
@@ -17,4 +17,9 @@ public interface AdminDAO extends GenericUserDAO<Admin>, PasswordUpdatabale {
     void verify(String userId) throws DAOExeption;
 
     int getMaxAdminIdNumber() throws DAOExeption;
+    
+    List<String> findAllAdminEmails() throws DAOExeption;
+    void update(Admin admin) throws DAOExeption;
+
+     
 }

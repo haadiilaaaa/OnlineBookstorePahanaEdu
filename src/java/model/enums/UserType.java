@@ -3,7 +3,8 @@ package model.enums;
 public enum UserType {
     CUSTOMER("customer"),
     ADMIN("admin"),
-    STAFF("staff");
+    STAFF("staff"),
+    DELIVERY("delivery");
 
     private final String type;
 

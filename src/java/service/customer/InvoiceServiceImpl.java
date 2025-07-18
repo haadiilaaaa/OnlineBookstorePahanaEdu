@@ -8,7 +8,7 @@ import java.util.List;
 
 public class InvoiceServiceImpl implements InvoiceService {
 
-   @Override
+  @Override
 public String generateInvoice(OrderDTO order, List<OrderItemDTO> items) {
     StringBuilder sb = new StringBuilder();
 
@@ -21,10 +21,10 @@ public String generateInvoice(OrderDTO order, List<OrderItemDTO> items) {
     sb.append("<hr><table border='1' cellpadding='5' cellspacing='0' style='width:100%; border-collapse: collapse;'>");
     sb.append("<tr><th>Title</th><th>Price</th><th>Qty</th><th>Subtotal</th></tr>");
 
-    BigDecimal total = BigDecimal.ZERO;
+    BigDecimal itemsTotal = BigDecimal.ZERO;
     for (OrderItemDTO item : items) {
         BigDecimal subtotal = item.getPrice().multiply(new BigDecimal(item.getQuantity()));
-        total = total.add(subtotal);
+        itemsTotal = itemsTotal.add(subtotal);
 
         sb.append("<tr>");
         sb.append("<td>").append(item.getItemTitle()).append("</td>");
@@ -34,11 +34,22 @@ public String generateInvoice(OrderDTO order, List<OrderItemDTO> items) {
         sb.append("</tr>");
     }
 
-    sb.append("<tr><td colspan='3' style='text-align:right;'><strong>Total</strong></td><td><strong>").append(total).append("</strong></td></tr>");
-    sb.append("</table><hr>");
+    // Add delivery fare row
+    BigDecimal deliveryFare = order.getDeliveryFare() != null ? order.getDeliveryFare() : BigDecimal.ZERO;
+    sb.append("<tr>");
+    sb.append("<td colspan='3' style='text-align:right;'><strong>Delivery Fare</strong></td>");
+    sb.append("<td>").append(deliveryFare).append("</td>");
+    sb.append("</tr>");
 
+    // Total including delivery fare
+    BigDecimal grandTotal = itemsTotal.add(deliveryFare);
+    sb.append("<tr><td colspan='3' style='text-align:right;'><strong>Total</strong></td><td><strong>")
+      .append(grandTotal).append("</strong></td></tr>");
+
+    sb.append("</table><hr>");
     sb.append("<p>Thank you for your order!</p>");
 
     return sb.toString();
 }
+
 }

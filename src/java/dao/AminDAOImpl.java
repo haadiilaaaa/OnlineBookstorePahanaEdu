@@ -3,7 +3,8 @@ package dao;
 import model.Admin;
 import util.DAOExeption;
 import util.ValidationException;
-
+import java.util.ArrayList;
+import java.util.List;
 import java.sql.*;
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -148,4 +149,40 @@ public class AminDAOImpl implements AdminDAO, GenericUserDAO<Admin>, PasswordUpd
         admin.setVerified(rs.getBoolean("is_verified"));
         return admin;
     }
+    @Override
+public List<String> findAllAdminEmails() throws DAOExeption {
+    List<String> emails = new ArrayList<>();
+    String query = "SELECT email FROM admin WHERE is_verified = 1"; // Only verified admins
+
+    try (PreparedStatement stmt = connection.prepareStatement(query);
+         ResultSet rs = stmt.executeQuery()) {
+
+        while (rs.next()) {
+            emails.add(rs.getString("email"));
+        }
+
+    } catch (SQLException e) {
+        throw new DAOExeption("Failed to fetch admin emails", e);
+    }
+
+    return emails;
+}
+
+@Override
+public void update(Admin admin) throws DAOExeption {
+    String sql = "UPDATE admin SET username = ?, first_name = ?, last_name = ?, email = ?, contact_number = ? WHERE id = ?";
+    try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        stmt.setString(1, admin.getUsername());
+        stmt.setString(2, admin.getFirstName());
+        stmt.setString(3, admin.getLastName());
+        stmt.setString(4, admin.getEmail());
+        stmt.setString(5, admin.getContactNumber());
+        stmt.setString(6, admin.getId());
+        stmt.executeUpdate();
+    } catch (SQLException e) {
+        throw new DAOExeption("Failed to update admin profile", e);
+    }
+}
+
+
 }

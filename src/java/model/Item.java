@@ -14,10 +14,7 @@ public class Item implements Serializable {
     private String imageUrl;
     private String categoryId;
     private Timestamp createdAt;
-    private BigDecimal originalPrice;  // original price before discount
-    private BigDecimal discountedPrice; // discounted price
-    private boolean hasDiscount;       // flag if discount applies
-    private String discountLabel;      // e.g. "20% OFF", "Sale" etc.
+     
 
     
 
@@ -58,35 +55,18 @@ public void setCategory(Category category) {
     this.category = category;
 }
     // getters and setters for these new fields
-    public BigDecimal getOriginalPrice() { return originalPrice; }
-    public void setOriginalPrice(BigDecimal originalPrice) { this.originalPrice = originalPrice; }
+  private DiscountMetaData discount;
 
-    public BigDecimal getDiscountedPrice() { return discountedPrice; }
-    public void setDiscountedPrice(BigDecimal discountedPrice) { this.discountedPrice = discountedPrice; }
-
-    public boolean isHasDiscount() { return hasDiscount; }
-    public void setHasDiscount(boolean hasDiscount) { this.hasDiscount = hasDiscount; }
-
-    public String getDiscountLabel() { return discountLabel; }
-    public void setDiscountLabel(String discountLabel) { this.discountLabel = discountLabel; }
-    private String discountType;
-private BigDecimal discountAmount;
-
-public String getDiscountType() {
-    return discountType;
+public DiscountMetaData getDiscount() {
+    return discount;
 }
 
-public void setDiscountType(String discountType) {
-    this.discountType = discountType;
+public void setDiscount(DiscountMetaData discount) {
+    this.discount = discount;
 }
 
-public BigDecimal getDiscountAmount() {
-    return discountAmount;
-}
 
-public void setDiscountAmount(BigDecimal discountAmount) {
-    this.discountAmount = discountAmount;
-}
+
 
 
 

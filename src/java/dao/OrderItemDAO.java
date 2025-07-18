@@ -4,11 +4,16 @@ import dto.OrderItemDTO;
 
 import java.util.List;
 import java.sql.SQLException;
+import util.DAOExeption;
 
 public interface OrderItemDAO {
-      int getNextOrderItemNumber() throws SQLException;
-    void saveOrderItems(List<OrderItemDTO> items) throws Exception;
-     List<OrderItemDTO> findItemsByOrderId(String orderId) throws Exception;
+     List<OrderItemDTO> findItemsByOrderId(String orderId) throws DAOExeption;
+int getNextOrderItemNumber() throws DAOExeption;
+void saveOrderItems(List<OrderItemDTO> items) throws DAOExeption;
+
+
+     
+     
   
 
 }

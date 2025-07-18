@@ -66,7 +66,8 @@ if (cart == null || cart.isEmpty()) {
             session.removeAttribute(CART);
 
             // ✅ Prepare invoice and attach attributes
-            OrderInvoiceHelper.prepareInvoiceData(req, order, user, order.getItems(), invoiceService, itemDAO);
+            OrderInvoiceHelper.prepareInvoiceData(req, order, user, order.getItems(), invoiceService, itemDAO, order.getDeliveryFare());
+
 
             session.setAttribute(ORDER_ID, order.getOrderId());
 

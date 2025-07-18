@@ -371,6 +371,7 @@
         <a href="ManageCategoriesServlet" class="nav-link" tabindex="0"><i class="fa-solid fa-tags"></i>Manage Categories</a>
         <a href="ManageDiscountServlet"   class="nav-link" tabindex="0"><i class="fa-solid fa-percent"></i>Manage Discounts</a>
         <a href="ViewAuditLogsServlet"    class="nav-link" tabindex="0"><i class="fa-solid fa-file-waveform"></i>Audit Logs</a>
+        <a href="EditAdminProfileServlet" class="nav-link" tabindex="0"><i class="fa-solid fa-user-gear"></i>Edit Profile</a> <!-- ✅ New link -->
 
         <div class="spacer"></div>
         <a href="logout.jsp" class="nav-link" tabindex="0"><i class="fa-solid fa-right-from-bracket"></i>Logout</a>
@@ -440,12 +441,16 @@
             </div>
 
             <div class="actions" role="list">
-                <a href="AddItemServlet" tabindex="0"><i class="fa-solid fa-box"></i>Manage Items</a>
-                <a href="ManageCategoriesServlet" tabindex="0"><i class="fa-solid fa-tags"></i>Manage Categories</a>
-                <a href="ManageDiscountServlet" tabindex="0"><i class="fa-solid fa-percent"></i>Manage Discounts</a>
-                <a href="ViewAuditLogsServlet" tabindex="0"><i class="fa-solid fa-file-waveform"></i>Audit Logs</a>
-                    <a href="AdminOrderHistoryServlet" tabindex="0"><i class="fa-solid fa-clipboard-list"></i>Manage Orders</a> <!-- ✅ New link -->
-            </div>
+    <a href="AddItemServlet" tabindex="0"><i class="fa-solid fa-box"></i>Manage Items</a>
+    <a href="ManageCategoriesServlet" tabindex="0"><i class="fa-solid fa-tags"></i>Manage Categories</a>
+    <a href="ManageDiscountServlet" tabindex="0"><i class="fa-solid fa-percent"></i>Manage Discounts</a>
+    <a href="ViewAuditLogsServlet" tabindex="0"><i class="fa-solid fa-file-waveform"></i>Audit Logs</a>
+    <a href="ManageGuidelinesServlet" class="nav-link" tabindex="0"><i class="fa-solid fa-scroll"></i>Manage Guidelines</a>
+    <a href="AdminOrderHistoryServlet" tabindex="0"><i class="fa-solid fa-clipboard-list"></i>Manage Orders</a>
+    <a href="ManageDeliveryPartnersServlet" tabindex="0"><i class="fa-solid fa-truck"></i>Manage Delivery Partners</a>
+    <a href="AdminManageUsersServlet" tabindex="0"><i class="fa-solid fa-user-group"></i>Manage Users</a> <!-- ✅ New link -->
+</div>
+
         </section>
 
         <footer>

@@ -17,11 +17,15 @@ public class LoginServiceFactory {
             CustomerDAO customerDAO = new CustomerDAOimpl(conn);
             AdminDAO adminDAO = new AminDAOImpl(conn);
             StaffDAO staffDAO = new StaffDAOImpl(conn);
+            DeliveryPartnerDAO deliveryPartnerDAO = new DeliveryPartnerDAOImpl(conn);
+
 
             List<Authenticator> authenticators = Arrays.asList(
                 new CustomerAuthenticator(customerDAO),
                 new AdminAuthenticator(adminDAO),
-                new StaffAuthenticator(staffDAO)
+                new StaffAuthenticator(staffDAO),
+                    new DeliveryPartnerAuthenticator(deliveryPartnerDAO)
+
             );
 
             return new LoginServiceImpl(authenticators);

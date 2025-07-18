@@ -12,5 +12,6 @@ public class SuccessMessages {
     public static final String DISCOUNT_CREATED = "Discount created successfully!";
     public static final String DISCOUNT_ASSIGNED = "Discount assigned successfully!";
     public static final String ASSIGNMENT_REMOVED = "Discount assignment removed successfully!";
+    public static final String PARTNER_ASSIGNED = "Delivery partner assigned successfully.";
 }
 

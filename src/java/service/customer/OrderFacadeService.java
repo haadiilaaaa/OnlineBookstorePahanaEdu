@@ -8,6 +8,7 @@ import strategy.payment.PaymentStrategy;
 import strategy.payment.PaymentStrategyFactory;
 
 import javax.servlet.http.HttpServletRequest;
+import java.math.BigDecimal;
 import java.util.Map;
 
 public class OrderFacadeService {
@@ -33,23 +34,27 @@ public class OrderFacadeService {
                                  String shippingAddress,
                                  String paymentMethod) throws Exception {
 
-        // Step 1: Prepare Order
+        // Step 1: Calculate delivery fare (flat fee or dynamic)
+        BigDecimal deliveryFare = new BigDecimal("250.00"); // for now, fixed flat rate
+
+        // Step 2: Prepare Order including delivery fare
         OrderDTO order = orderPreparationService.prepareOrder(
                 user.getId(),
                 user.getFullName(),
                 user.getEmail(),
                 shippingAddress,
                 paymentMethod,
-                cart
+                cart,
+                deliveryFare
         );
 
-        // Step 2: Generate invoice and store PDF
+        // Step 3: Generate invoice and store PDF
         byte[] pdfBytes = invoiceStorageService.generateAndStoreInvoice(req, order);
 
-        // Step 3: Payment strategy creation
+        // Step 4: Payment strategy creation
         PaymentStrategy strategy = PaymentStrategyFactory.getStrategy(paymentMethod, req, paymentDAO);
 
-        // Step 4: Process payment, save order, clear cart
+        // Step 5: Process payment, save order, clear cart
         paymentProcessingService.process(order, strategy, user.getEmail(), cart, pdfBytes);
 
         return order;

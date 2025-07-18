@@ -12,6 +12,7 @@ public class RegistrationRequestBuilder {
         converters.put("customer", new CustomerRequestToDTOConverter());
         converters.put("admin", new AdminRequestToDTOConverter());
         converters.put("staff", new StaffRequestToDTOConverter());
+        converters.put("delivery",new DeliveryRequestToDTOConverter());
     }
 
     public static Object buildDTO(String userType, HttpServletRequest request) {
