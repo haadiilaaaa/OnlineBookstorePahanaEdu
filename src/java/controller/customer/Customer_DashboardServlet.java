@@ -1,75 +1,62 @@
 package controller.customer;
-
+import util.csrf.*;
 import dto.CustomerDashboardDTO;
 import dto.UserSession;
-import model.CartItem;
 import service.customer.CustomerDashboardService;
-import util.CartUtil;
-import util.csrf.CSRFTokenUtil;
 import util.contannts.*;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
 import java.io.IOException;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static util.contannts.ContextKeys.CUSTOMER_DASHBOARD_SERVICE;
+import service.customer.CartFacade;
 import service.customer.ItemServiceFactory;
+import java.sql.Connection;
 
 public class Customer_DashboardServlet extends BaseCustomerServlet {
 
     private static final Logger LOGGER = Logger.getLogger(Customer_DashboardServlet.class.getName());
     private CustomerDashboardService dashboardService;
+    private CartFacade cartFacade;
 
-   @Override
-public void init() throws ServletException {
-    super.init(); // optional, if BaseCustomerServlet has init()
-
-    // Obtain the CustomerDashboardService from ServletContext
-    dashboardService = (CustomerDashboardService) getServletContext().getAttribute(ContextKeys.CUSTOMER_DASHBOARD_SERVICE);
-    if (dashboardService == null) {
-        throw new ServletException("CustomerDashboardService not initialized in ServletContext.");
+    @Override
+    public void init() throws ServletException {
+        // Dependencies should be injected via the ServletContext, not created.
+        this.dashboardService = (CustomerDashboardService) getServletContext().getAttribute(CUSTOMER_DASHBOARD_SERVICE);
+        this.cartFacade = (CartFacade) getServletContext().getAttribute(ContextKeys.CART_FACADE);
+        
+        if (dashboardService == null || cartFacade == null) {
+            throw new ServletException("Required services not initialized in ServletContext.");
+        }
     }
-
-    // Initialize cartService here too, so base class methods can use it
-    try {
-        java.sql.Connection conn = db.DBConnection.getInstance().getConnection();
-        cartService = ItemServiceFactory.createCartService(conn);
-    } catch (Exception e) {
-        throw new ServletException("Failed to initialize CartService", e);
-    }
-}
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
         try {
-            // Use base class method to get user and redirect if needed
             UserSession userSession = getAuthenticatedUser(request, response);
-            if (userSession == null) return; // redirected to login page
+            if (userSession == null) return;
 
-            // Use base class method to ensure cart is loaded
-            ensureCartLoaded(request, userSession.getId());
+            // Load the cart using the facade
+            cartFacade.loadCartForUser(request.getSession(), userSession.getId());
 
             // Load dashboard data
             CustomerDashboardDTO dto = dashboardService.loadDashboard(userSession.getId());
 
-            // Set dashboard data and category list
             request.setAttribute(AttributeKeys.DASHBOARD_DATA, dto);
             request.setAttribute(AttributeKeys.CATEGORIES, dashboardService.getAllCategories());
 
-            // Set filter parameters (pass through request params)
+            // Set filter parameters for the JSP
             request.setAttribute(AttributeKeys.SELECTED_CATEGORY, request.getParameter(ParameterKeys.CATEGORY_ID));
             request.setAttribute(AttributeKeys.SEARCH_KEYWORD, request.getParameter(ParameterKeys.SEARCH));
             request.setAttribute(AttributeKeys.MIN_PRICE, request.getParameter(ParameterKeys.MIN_PRICE));
             request.setAttribute(AttributeKeys.MAX_PRICE, request.getParameter(ParameterKeys.MAX_PRICE));
 
-            // Update cart map in session from dashboard DTO (optional if your base class logic suffices)
-            Map<String, CartItem> cartMap = CartUtil.convertListToMap(dto.getCartItems());
-            request.getSession().setAttribute(SessionKeys.CART, cartMap);
-
-            // Generate CSRF token and pass to JSP
+            // The CSRF token generation is also a business concern
+            // and might be better handled by a security service or a utility class.
+            // For now, let's keep it here for clarity.
             String csrfToken = CSRFTokenUtil.generateToken(request.getSession());
             request.setAttribute(AttributeKeys.CSRF_TOKEN, csrfToken);
 

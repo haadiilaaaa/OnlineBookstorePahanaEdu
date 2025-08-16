@@ -1,84 +1,70 @@
 package controller.customer;
 
 import dto.UserSession;
-import dto.ItemDTO;
+import dto.AddToCartRequestDTO;
 import service.common.Validator;
-import service.customer.CartService;
-import service.customer.DiscountService;
-import service.admin.ItemService;
-import util.*;
+import util.ValidationException;
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
 import java.io.IOException;
-import java.math.BigDecimal;
-import dto.*;
-import service.common.*;
+import command.customer.cart.AddToCartCommand;
 import static util.contannts.SessionKeys.*;
 import static util.contannts.PagePaths.*;
 import static util.contannts.ErrorMessages.*;
 import static util.contannts.ParameterKeys.*;
 import static util.contannts.AttributeKeys.ERROR_MESSAGE;
+import service.customer.CartFacade; // Import the CartFacade
 
 public class AddToCartServlet extends BaseCustomerServlet {
 
-    private DiscountService discountService;
-    private ItemService itemService;
-    private Validator validator;
-    private CartService cartService;
+    private AddToCartCommand addToCartCommand;
+    private Validator<AddToCartRequestDTO> validator;
+    private CartFacade cartFacade; // New dependency
 
     @Override
     public void init() throws ServletException {
-        this.cartService = (CartService) getServletContext().getAttribute("CartService");
-        this.itemService = (ItemService) getServletContext().getAttribute("ItemService");
-        this.discountService = (DiscountService) getServletContext().getAttribute("DiscountService");
-        this.validator = (Validator) getServletContext().getAttribute("AddToCartRequestValidator");
+        this.addToCartCommand = (AddToCartCommand) getServletContext().getAttribute("AddToCartCommand");
+        this.validator = (Validator<AddToCartRequestDTO>) getServletContext().getAttribute("AddToCartRequestValidator");
+        this.cartFacade = (CartFacade) getServletContext().getAttribute("CartFacade"); // Retrieve the facade
 
-        if (cartService == null || itemService == null || discountService == null) {
+        if (addToCartCommand == null || validator == null || cartFacade == null) {
             throw new ServletException("Failed to initialize AddToCartServlet due to missing dependencies");
         }
     }
 
     @Override
-protected void doPost(HttpServletRequest request, HttpServletResponse response)
-        throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
 
-    UserSession user = getAuthenticatedUser(request, response);
-    if (user == null) return;
-
-    // Wrap request parameters in DTO
-    AddToCartRequestDTO dto = new AddToCartRequestDTO();
-    dto.setItemId(request.getParameter(ITEM_ID));
-    dto.setQuantity(request.getParameter(QUANTITY));
-
-    try {
-        // Get validator from factory
-        Validator<AddToCartRequestDTO> validator = ValidatorFactory.getValidator("addToCart");
-        // Validate input
-        validator.validate(dto);
-
-        ItemDTO item = itemService.getItemById(dto.getItemId());
-        if (item == null) {
-            response.sendRedirect(BOOK_BROWSE_PAGE + "?error=" + ITEM_NOT_FOUND);
+        UserSession user = getAuthenticatedUser(request, response);
+        if (user == null) {
             return;
         }
 
-        int quantity = Integer.parseInt(dto.getQuantity());
+        AddToCartRequestDTO dto = new AddToCartRequestDTO();
+        dto.setItemId(request.getParameter(ITEM_ID));
+        dto.setQuantity(request.getParameter(QUANTITY));
 
-// No need to get effectivePrice here; service will handle it
-cartService.addItem(user.getId(), item, quantity, request.getSession());
+        try {
+            validator.validate(dto);
 
-        request.getSession().setAttribute(SUCCESS_MESSAGE, "Item added to cart successfully.");
-    } catch (ValidationException ve) {
-        // Handle validation error gracefully
-        request.setAttribute(ERROR_MESSAGE, ve.getMessage());
-        request.getRequestDispatcher(BOOK_BROWSE_PAGE).forward(request, response);
-        return;
-    } catch (Exception e) {
-        request.setAttribute(ERROR_MESSAGE, CART_LOAD_FAILED);
-        e.printStackTrace();
+            // Step 1: Check if the item already exists in the cart for this user
+            if (cartFacade.isItemInCart(user.getId(), dto.getItemId())) {
+                request.getSession().setAttribute(ERROR_MESSAGE, "This item is already in your cart. You can update its quantity from the cart page.");
+            } else {
+                // Step 2: If the item is not in the cart, proceed with the command
+                addToCartCommand.execute(dto, user, request.getSession());
+                request.getSession().setAttribute(SUCCESS_MESSAGE, "Item added to cart successfully.");
+            }
+
+            response.sendRedirect(request.getContextPath() + BOOK_BROWSE_SERVLET);
+        } catch (ValidationException ve) {
+            request.getSession().setAttribute(ERROR_MESSAGE, ve.getMessage());
+            response.sendRedirect(request.getContextPath() + BOOK_BROWSE_SERVLET);
+        } catch (Exception e) {
+            request.getSession().setAttribute(ERROR_MESSAGE, CART_LOAD_FAILED);
+            response.sendRedirect(request.getContextPath() + BOOK_BROWSE_SERVLET);
+            e.printStackTrace();
+        }
     }
-
-    response.sendRedirect(BOOK_BROWSE_SERVLET);
-}
-
 }

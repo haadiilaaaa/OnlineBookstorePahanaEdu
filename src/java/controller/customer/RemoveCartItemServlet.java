@@ -9,39 +9,36 @@ import javax.servlet.ServletException;
 import javax.servlet.http.*;
 import java.io.IOException;
 import java.sql.Connection;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 import service.customer.SessionCartManager;
 import static util.contannts.ParameterKeys.*;
 import static util.contannts.PagePaths.*;
 import static util.contannts.ErrorMessages.*;
 import service.customer.DiscountService;
 import mapper.ItemMapper;
+import service.customer.CartFacade;
 import service.customer.CartServiceImpl;
+import service.customer.PersistentCartService;
+import service.customer.SessionCartService;
+import service.customer.ItemServiceFactory;
+import service.admin.DiscountManagementService;
 
 public class RemoveCartItemServlet extends BaseCustomerServlet {
 
-    private static final Logger logger = Logger.getLogger(RemoveCartItemServlet.class.getName());
-    private CartItemDAO cartItemDAO;
+    protected CartFacade cartFacade;
 
-   @Override
-public void init() throws ServletException {
-    try {
-        Connection connection = DBConnection.getInstance().getConnection();
-        cartItemDAO = new CartItemDAOimpl(connection);
-
-        SessionCartManager sessionCartManager = new SessionCartManager();
-
-        DiscountService discountService = (DiscountService) getServletContext().getAttribute("DiscountService");
-        ItemMapper itemMapper = new ItemMapper(); // or fetch from context if you registered it
-
-        this.cartService = new CartServiceImpl(cartItemDAO, sessionCartManager, discountService, itemMapper);
-    } catch (Exception e) {
-        logger.log(Level.SEVERE, "❌ Init failed", e);
-        throw new ServletException("DB connection error", e);
+    @Override
+    public void init() throws ServletException {
+        // We'll rely on the ItemServiceFactory to create our CartFacade,
+        // which encapsulates all the cart logic.
+        try (Connection connection = DBConnection.getInstance().getConnection()) {
+            this.cartFacade = ItemServiceFactory.createCartFacade(connection);
+        } catch (Exception e) {
+            System.out.println("❌ Init failed: " + e.getMessage());
+            e.printStackTrace();
+            throw new ServletException("DB connection error or CartFacade creation failed", e);
+        }
     }
-}
-
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
@@ -49,15 +46,27 @@ public void init() throws ServletException {
 
         String itemId = req.getParameter(ITEM_ID);
         UserSession userSession = getAuthenticatedUser(req, resp);
-        if (userSession == null) return;
 
-        try {
-            cartItemDAO.deleteByCustomerAndItem(userSession.getId(), itemId);
-            refreshCartInSession(req, userSession.getId());
-            resp.sendRedirect(CART_PAGE + "?success=" + ITEM_REMOVED_SUCCESSFULLY);
+        // Make sure a user is authenticated and the item ID is not null
+        if (userSession == null || itemId == null || itemId.trim().isEmpty()) {
+            resp.sendRedirect(req.getContextPath() + "/" + CART_PAGE + "?error=invalidRequest");
+            return;
+        }
+
+        // Get a new database connection for this request
+        try (Connection connection = DBConnection.getInstance().getConnection()) {
+            // Create a new CartFacade for this request using the fresh connection
+            CartFacade cartFacade = ItemServiceFactory.createCartFacade(connection);
+
+            // Use the facade to remove the item and refresh the session
+            cartFacade.removeCartItemAndRefreshSession(userSession.getId(), itemId, req.getSession());
+
+            // Redirect with a success message
+            resp.sendRedirect(req.getContextPath() + "/" + CART_PAGE + "?success=itemRemoved");
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "🛑 Remove failed", e);
-            resp.sendRedirect(CART_PAGE + "?error=" + ITEM_REMOVE_FAILED);
+            System.out.println("🛑 Failed to remove item from cart: " + e.getMessage());
+            e.printStackTrace();
+            resp.sendRedirect(req.getContextPath() + "/" + CART_PAGE + "?error=cartUpdateFailed");
         }
     }
 }

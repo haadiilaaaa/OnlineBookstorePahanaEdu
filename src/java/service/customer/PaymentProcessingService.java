@@ -27,30 +27,39 @@ public class PaymentProcessingService {
     }
 
     public void process(OrderDTO order,
-                        PaymentStrategy strategy,
-                        String email,
-                        Map<String, CartItem> cart,
-                        byte[] pdfBytes) throws Exception {
+                    PaymentStrategy strategy,
+                    String email,
+                    Map<String, CartItem> cart,
+                    byte[] pdfBytes) throws Exception {
 
-        // Persist order and items
-        orderDAO.saveOrder(order);
-        orderItemDAO.saveOrderItems(order.getItems());
+    // 1. Handle payment first
+    strategy.processPayment(order);
 
-        // Handle payment
-        strategy.processPayment(order);
-
-        // Send confirmation email
-        orderEmailService.sendOrderConfirmation(
-                email,
-                order,
-                order.getItems(),
-                order.getInvoiceHtml(),
-                pdfBytes,
-                "Your Order Confirmation – " + order.getOrderId()
-        );
-
-        // Clear cart in DB and memory
-        cartItemDAO.deleteCartItemsByUserId(order.getUserId());
-        cart.clear();
+    // 2. Set the order status based on the payment outcome
+    // This is the missing step in your logic.
+    String paymentMethod = order.getPaymentMethod();
+    if ("Credit Card".equals(paymentMethod) || "Debit Card".equals(paymentMethod)) {
+        order.setStatus("PAID");
+    } else {
+        order.setStatus("PENDING");
     }
+
+    // 3. Persist the order and items with the correct final status
+    orderDAO.saveOrder(order);
+    orderItemDAO.saveOrderItems(order.getItems());
+
+    // 4. Send confirmation email
+    orderEmailService.sendOrderConfirmation(
+            email,
+            order,
+            order.getItems(),
+            order.getInvoiceHtml(),
+            pdfBytes,
+            "Your Order Confirmation – " + order.getOrderId()
+    );
+
+    // 5. Clear cart
+    cartItemDAO.deleteCartItemsByUserId(order.getUserId());
+    cart.clear();
+}
 }

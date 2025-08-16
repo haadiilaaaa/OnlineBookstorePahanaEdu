@@ -1,7 +1,7 @@
 package dao;
 
 import model.CartItem;
-
+import db.DBConnection;
 import java.math.BigDecimal;
 import java.sql.*;
 import java.util.ArrayList;
@@ -15,19 +15,23 @@ public class CartItemDAOimpl implements CartItemDAO {
         this.connection = connection;
     }
 
-    @Override
-    public void save(CartItem cartItem) throws Exception {
-        String sql = "INSERT INTO cart_item (id, customer_id, item_id, quantity,price) VALUES (?, ?, ?, ?,?)";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setString(1, cartItem.getId());
-            stmt.setString(2, cartItem.getCustomerId());
-            stmt.setString(3, cartItem.getItemId());
-            stmt.setInt(4, cartItem.getQuantity());
-            stmt.setBigDecimal(5, cartItem.getPrice()); // actual price used (discounted or not)
+   // dao.CartItemDAOimpl.java
 
-            stmt.executeUpdate();
-        }
+@Override
+public void save(CartItem cartItem) throws Exception {
+    String sql = "INSERT INTO cart_item (id, customer_id, item_id, quantity,price) VALUES (?, ?, ?, ?,?)";
+    try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        System.out.println("DEBUG: Attempting to save cart item with ID: " + cartItem.getId());
+        stmt.setString(1, cartItem.getId());
+        stmt.setString(2, cartItem.getCustomerId());
+        stmt.setString(3, cartItem.getItemId());
+        stmt.setInt(4, cartItem.getQuantity());
+        stmt.setBigDecimal(5, cartItem.getPrice()); 
+
+        stmt.executeUpdate();
+        System.out.println("DEBUG: Successfully saved cart item with ID: " + cartItem.getId());
     }
+}
 
     @Override
 public int getMaxCartItemNumber() throws Exception {
@@ -97,7 +101,8 @@ public List<CartItem> findByCustomerId(String customerId) throws Exception {
         return BigDecimal.ZERO;
     }
     // In CartItemDAOimpl
-@Override
+    
+   @Override
 public void updateQuantity(String customerId, String itemId, int quantity) throws Exception {
     String sql = "UPDATE cart_item SET quantity = ? WHERE customer_id = ? AND item_id = ?";
     try (PreparedStatement stmt = connection.prepareStatement(sql)) {
@@ -107,7 +112,6 @@ public void updateQuantity(String customerId, String itemId, int quantity) throw
         stmt.executeUpdate();
     }
 }
-
 @Override
 public void deleteByCustomerAndItem(String customerId, String itemId) throws Exception {
     String sql = "DELETE FROM cart_item WHERE customer_id = ? AND item_id = ?";
@@ -127,25 +131,57 @@ public void deleteByCustomerAndItem(String customerId, String itemId) throws Exc
             stmt.executeUpdate();
         }
     }
-    @Override
-public void addCartItem(String customerId, String itemId, int quantity, BigDecimal price) throws Exception {
-    String sql = "INSERT INTO cart_item (id, customer_id, item_id, quantity, price) VALUES (?, ?, ?, ?, ?)";
+  
 
-    // Generate a new unique ID for cart item — you can adapt this logic:
-    int maxId = getMaxCartItemNumber();
-    String newId = "cart" + (maxId + 1);
-
-    try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-        stmt.setString(1, newId);
-        stmt.setString(2, customerId);
-        stmt.setString(3, itemId);
-        stmt.setInt(4, quantity);
-        stmt.setBigDecimal(5, price);
-        stmt.executeUpdate();
+@Override
+    public List<CartItem> findAll() throws Exception {
+        List<CartItem> items = new ArrayList<>();
+        String sql = "SELECT * FROM cart_item";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                CartItem item = new CartItem(
+                    rs.getString("id"),
+                    rs.getString("customer_id"),
+                    rs.getString("item_id"),
+                    rs.getInt("quantity")
+                );
+                item.setPrice(rs.getBigDecimal("price"));
+                items.add(item);
+            }
+        }
+        return items;
     }
+
+    // In CartItemDAOimpl.java
+@Override
+public CartItem findByCustomerAndItem(String customerId, String itemId) throws Exception {
+    String sql = "SELECT * FROM cart_item WHERE customer_id = ? AND item_id = ?";
+    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        ps.setString(1, customerId);
+        ps.setString(2, itemId);
+        try (ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return extractCartItemFromResultSet(rs);
+            }
+        }
+    }
+    return null; // Return null if the item is not found
 }
 
-
+private CartItem extractCartItemFromResultSet(ResultSet rs) throws SQLException {
+    String id = rs.getString("id");
+    String customerId = rs.getString("customer_id");
+    String itemId = rs.getString("item_id");
+    int quantity = rs.getInt("quantity");
+    BigDecimal price = rs.getBigDecimal("price");
+    
+    CartItem cartItem = new CartItem(id, customerId, itemId, quantity);
+    cartItem.setPrice(price);
+    
+    return cartItem;
+}
+}
 
   
-}
+

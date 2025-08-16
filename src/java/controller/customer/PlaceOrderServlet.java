@@ -37,17 +37,22 @@ public class PlaceOrderServlet extends BaseCustomerServlet {
             throws ServletException, IOException {
 
         UserSession user = getAuthenticatedUser(req, resp);
-        if (user == null) return;
+    if (user == null) {
+        System.out.println("DEBUG: User session is null, redirecting to login.");
+        return;
+    }
+        
 
         HttpSession session = req.getSession();
       
      
     Map<String, CartItem> cart = (Map<String, CartItem>) session.getAttribute(CART);
 
-if (cart == null || cart.isEmpty()) {
-    resp.sendRedirect(CUSTOMER_DASHBOARD_PAGE);
-    return;
-}
+    if (cart == null || cart.isEmpty()) {
+        System.out.println("DEBUG: Cart is empty, redirecting to customer dashboard.");
+        resp.sendRedirect(CUSTOMER_DASHBOARD_PAGE);
+        return;
+    }
 
 
 
@@ -59,8 +64,13 @@ if (cart == null || cart.isEmpty()) {
         try {
             String shippingAddress = req.getParameter("shippingAddress");
             String paymentMethod = req.getParameter("paymentMethod");
+            
+             System.out.println("DEBUG: Processing order for user " + user.getId());
+        System.out.println("DEBUG: Shipping Address: " + shippingAddress);
+        System.out.println("DEBUG: Payment Method: " + paymentMethod);
 
             OrderDTO order = orderFacadeService.processOrder(req, user, cart, shippingAddress, paymentMethod);
+            System.out.println("DEBUG: Order successfully processed with ID: " + order.getOrderId());
 
             // ✅ Clear cart
             session.removeAttribute(CART);
@@ -70,13 +80,16 @@ if (cart == null || cart.isEmpty()) {
 
 
             session.setAttribute(ORDER_ID, order.getOrderId());
+            System.out.println("DEBUG: Cart removed from session. Order ID set in session: " + session.getAttribute(ORDER_ID));
+              System.out.println("DEBUG: Redirecting to OrderConfirmationServlet at path: " + req.getContextPath() + ORDER_CONFIRMATION);
 
             resp.sendRedirect(req.getContextPath() + ORDER_CONFIRMATION);
 
         } catch (Exception e) {
-            e.printStackTrace();
-            req.setAttribute("error", "⚠️ Failed to place order. Please try again.");
-            req.getRequestDispatcher(CHECKOUT_PAGE).forward(req, resp);
+            System.err.println("DEBUG: An error occurred during order placement.");
+        e.printStackTrace();
+        req.setAttribute("error", "⚠️ Failed to place order. Please try again.");
+        req.getRequestDispatcher(CHECKOUT_PAGE).forward(req, resp);
         }
     }
 }

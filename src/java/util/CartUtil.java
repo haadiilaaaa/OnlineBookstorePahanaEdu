@@ -5,16 +5,11 @@ import model.CartItem;
 import model.Item;
 
 import java.math.BigDecimal;
-import java.sql.Connection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class CartUtil {
-
-    private static final Logger LOGGER = Logger.getLogger(CartUtil.class.getName());
 
     /**
      * Calculates the total price of items in the cart.
@@ -27,7 +22,7 @@ public class CartUtil {
         BigDecimal total = BigDecimal.ZERO;
 
         if (cart == null || itemDAO == null) {
-            LOGGER.warning("Cart or ItemDAO is null in calculateCartTotal()");
+            System.out.println("Cart or ItemDAO is null in calculateCartTotal()");
             return total;
         }
 
@@ -40,10 +35,11 @@ public class CartUtil {
                 if (item != null) {
                     total = total.add(item.getPrice().multiply(BigDecimal.valueOf(quantity)));
                 } else {
-                    LOGGER.warning("Item not found for ID: " + itemId);
+                    System.out.println("Item not found for ID: " + itemId);
                 }
             } catch (Exception e) {
-                LOGGER.log(Level.SEVERE, "Error fetching item for ID: " + itemId, e);
+                System.out.println("Error fetching item for ID: " + itemId);
+                e.printStackTrace();
             }
         }
 
@@ -64,7 +60,7 @@ public class CartUtil {
             if (item != null && item.getItemId() != null) {
                 map.put(item.getItemId(), item);
             } else {
-                LOGGER.warning("Null item or itemId found in convertListToMap()");
+                System.out.println("Null item or itemId found in convertListToMap()");
             }
         }
         return map;

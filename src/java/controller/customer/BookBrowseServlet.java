@@ -1,49 +1,33 @@
 package controller.customer;
 
-import dto.CategoryDTO;
-import dto.ItemDTO;
 import dto.UserSession;
-import service.admin.CategoryService;
-import service.admin.ItemService;
-import service.common.CategoryCache;
-import service.customer.CartService;
 import handler.customer.BookBrowseHandler;
-import service.customer.ItemServiceFactory;
-import util.contannts.*;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
 import java.io.IOException;
-import java.sql.Connection;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import static util.contannts.AttributeKeys.ERROR;
+import static util.contannts.PagePaths.ERROR_PAGE;
+import static util.contannts.SessionKeys.ERROR_MESSAGE;
+import static util.contannts.SessionKeys.SUCCESS_MESSAGE;
 
 public class BookBrowseServlet extends BaseCustomerServlet {
-    
-    private static final Logger logger = Logger.getLogger(BookBrowseServlet.class.getName());
+
     private BookBrowseHandler browseHandler;
 
-    // Setter injection
+    // Setter for injection.
     public void setBrowseHandler(BookBrowseHandler handler) {
         this.browseHandler = handler;
     }
 
     @Override
     public void init() throws ServletException {
-        if (browseHandler == null) {
-            // Fallback to default creation if not injected
-            try {
-                Connection conn = db.DBConnection.getInstance().getConnection();
-                ItemService itemService = ItemServiceFactory.createItemService(conn);
-                CategoryService categoryService = ItemServiceFactory.createCategoryService(conn);
-                cartService = ItemServiceFactory.createCartService(conn);
-                CategoryCache categoryCache = ItemServiceFactory.createCategoryCache(categoryService, getServletContext());
+        // The servlet now gets its handler from the ServletContext,
+        // assuming a listener or factory has already created and configured it.
+        this.browseHandler = (BookBrowseHandler) getServletContext().getAttribute("BookBrowseHandler");
 
-                browseHandler = new BookBrowseHandler(itemService, categoryCache, cartService);
-            } catch (Exception e) {
-                throw new ServletException(e);
-            }
+        if (this.browseHandler == null) {
+            throw new ServletException("BookBrowseHandler not initialized in ServletContext.");
         }
     }
 
@@ -51,16 +35,38 @@ public class BookBrowseServlet extends BaseCustomerServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
             UserSession user = getAuthenticatedUser(req, resp);
-            if (user == null) return; // redirected to login
+            if (user == null) {
+                return; // User is not authenticated, getAuthenticatedUser has already redirected.
+            }
 
-            ensureCartLoaded(req, user.getId());
+            // --- THIS IS THE CRITICAL ADDITION ---
+            // Fetch messages from the session and transfer them to the request scope.
+            // This ensures they are available to the JSP for display.
+            // The `AddToCartServlet` redirects here after adding an item,
+            // so the messages are stored in the session.
+            HttpSession session = req.getSession();
+            String successMsg = (String) session.getAttribute(SUCCESS_MESSAGE);
+            String errorMsg = (String) session.getAttribute(ERROR_MESSAGE);
 
+            if (successMsg != null) {
+                req.setAttribute(SUCCESS_MESSAGE, successMsg);
+                session.removeAttribute(SUCCESS_MESSAGE); // Clear the message from session after reading
+            }
+
+            if (errorMsg != null) {
+                req.setAttribute(ERROR_MESSAGE, errorMsg);
+                session.removeAttribute(ERROR_MESSAGE); // Clear the message from session after reading
+            }
+            // -------------------------------------
+
+            // All business logic is now handled by the browseHandler.
             browseHandler.handleRequest(req, resp);
 
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "Failed to process book browse request", e);
-            req.setAttribute(AttributeKeys.ERROR, "Failed to load books.");
-            req.getRequestDispatcher(PagePaths.ERROR_PAGE).forward(req, resp);
+            System.out.println("Failed to process book browse request: " + e.getMessage());
+            e.printStackTrace();
+            req.setAttribute(ERROR, "Failed to load books.");
+            req.getRequestDispatcher(ERROR_PAGE).forward(req, resp);
         }
     }
 }

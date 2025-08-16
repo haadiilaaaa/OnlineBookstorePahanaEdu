@@ -1,39 +1,23 @@
 package controller.customer;
 
 import dto.UserSession;
-import model.CartItem;
-import service.customer.CartService;
-
-import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
 import java.io.IOException;
-import java.util.Map;
 
 import static util.contannts.PagePaths.LOGIN_PAGE;
-import static util.contannts.SessionKeys.CART;
 import static util.contannts.SessionKeys.USER;
 
 public abstract class BaseCustomerServlet extends HttpServlet {
 
-    protected CartService cartService;
-
-    // Setter for injection in tests or manual wiring
-    public void setCartService(CartService cartService) {
-        this.cartService = cartService;
-    }
-
-    @Override
-    public void init(ServletConfig config) throws ServletException {
-        super.init(config);
-        if (this.cartService == null) {
-            this.cartService = (CartService) getServletContext().getAttribute("CartService");
-            if (this.cartService == null) {
-                throw new ServletException("CartService not initialized in ServletContext");
-            }
-        }
-    }
-
+    /**
+     * Retrieves the authenticated user from the session.
+     * Redirects to the login page if no authenticated user is found.
+     * @param req The HttpServletRequest.
+     * @param resp The HttpServletResponse.
+     * @return The UserSession object if authenticated, otherwise null.
+     * @throws IOException
+     */
     protected UserSession getAuthenticatedUser(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         HttpSession session = req.getSession(false);
         if (session == null || session.getAttribute(USER) == null) {
@@ -41,18 +25,5 @@ public abstract class BaseCustomerServlet extends HttpServlet {
             return null;
         }
         return (UserSession) session.getAttribute(USER);
-    }
-
-    protected void ensureCartLoaded(HttpServletRequest req, String customerId) throws Exception {
-        HttpSession session = req.getSession();
-        if (session.getAttribute(CART) == null) {
-            Map<String, CartItem> cart = cartService.getCartMapByCustomerId(customerId);
-            session.setAttribute(CART, cart);
-        }
-    }
-
-    protected void refreshCartInSession(HttpServletRequest req, String customerId) throws Exception {
-        Map<String, CartItem> updatedCart = cartService.getCartMapByCustomerId(customerId);
-        req.getSession().setAttribute(CART, updatedCart);
     }
 }

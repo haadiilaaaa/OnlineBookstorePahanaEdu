@@ -1,10 +1,7 @@
 package service.customer;
 
 import dao.CartItemDAO;
-import dto.ItemDTO;
-import mapper.ItemMapper;
 import model.CartItem;
-import model.Item;
 import util.IDGenerator;
 
 import javax.servlet.http.HttpSession;
@@ -12,21 +9,21 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import static util.contannts.SessionKeys.CART;
 
-public class CartServiceImpl implements CartService {
+public class CartServiceImpl implements PersistentCartService, SessionCartService {
 
     private final CartItemDAO cartItemDAO;
     private final SessionCartManager sessionCartManager;
-    private final DiscountService discountService;
-    private final ItemMapper itemMapper;
+    private final IDGenerator<String> cartIdGenerator;
 
-    public CartServiceImpl(CartItemDAO cartItemDAO, SessionCartManager sessionCartManager, DiscountService discountService, ItemMapper itemMapper) {
+    public CartServiceImpl(CartItemDAO cartItemDAO, SessionCartManager sessionCartManager, IDGenerator<String> cartIdGenerator) {
         this.cartItemDAO = cartItemDAO;
         this.sessionCartManager = sessionCartManager;
-        this.discountService = discountService;
-        this.itemMapper = itemMapper;
+        this.cartIdGenerator = cartIdGenerator;
     }
 
+    // --- PersistentCartService implementations ---
     @Override
     public Map<String, CartItem> getCartMapByCustomerId(String customerId) throws Exception {
         List<CartItem> cartItems = cartItemDAO.findByCustomerId(customerId);
@@ -41,23 +38,31 @@ public class CartServiceImpl implements CartService {
                 ));
     }
 
-    @Override
-    public void loadCartForUser(HttpSession session, String customerId) throws Exception {
-        if (session.getAttribute(SessionCartManager.CART_SESSION_KEY) == null) {
-            Map<String, CartItem> cartMap = getCartMapByCustomerId(customerId);
-            session.setAttribute(SessionCartManager.CART_SESSION_KEY, cartMap);
-        }
-    }
+    // Inside CartServiceImpl
+   // Inside service.customer.CartServiceImpl
+       // In CartServiceImpl.java
+    // In CartServiceImpl.java
+       @Override
+public void addCartItem(String customerId, String itemId, int quantity, BigDecimal price) throws Exception {
+    System.out.println("DEBUG: Starting addCartItem for customer " + customerId + " and item " + itemId);
+    CartItem existingItem = cartItemDAO.findByCustomerAndItem(customerId, itemId);
 
-    @Override
-    public void addCartItem(String customerId, String itemId, int quantity, BigDecimal price) throws Exception {
-        int nextId = cartItemDAO.getMaxCartItemNumber() + 1;
-        String cartItemId = IDGenerator.generateId("cart", nextId);
-
+    if (existingItem != null) {
+        System.out.println("DEBUG: Item " + itemId + " found in cart. Updating quantity.");
+        int newQuantity = existingItem.getQuantity() + quantity;
+        cartItemDAO.updateQuantity(customerId, itemId, newQuantity);
+        System.out.println("DEBUG: Updated quantity for item " + itemId + " to " + newQuantity);
+    } else {
+        System.out.println("DEBUG: Item " + itemId + " not found in cart. Generating new ID and saving.");
+        String cartItemId = cartIdGenerator.generate(); 
+        System.out.println("DEBUG: Generated new cart ID: " + cartItemId);
         CartItem dbItem = new CartItem(cartItemId, customerId, itemId, quantity);
         dbItem.setPrice(price);
         cartItemDAO.save(dbItem);
+        System.out.println("DEBUG: Successfully saved new cart item with ID: " + cartItemId);
     }
+    System.out.println("DEBUG: Finished addCartItem for customer " + customerId + " and item " + itemId);
+}
 
     @Override
     public void updateCartItemQuantity(String customerId, String itemId, int quantity) throws Exception {
@@ -72,6 +77,15 @@ public class CartServiceImpl implements CartService {
     @Override
     public void clearCart(String customerId) throws Exception {
         cartItemDAO.deleteCartItemsByUserId(customerId);
+    }
+    
+    // --- SessionCartService implementations ---
+    @Override
+    public void loadCartForUser(HttpSession session, String customerId) throws Exception {
+        if (session.getAttribute(CART) == null) {
+            Map<String, CartItem> cartMap = getCartMapByCustomerId(customerId);
+            session.setAttribute(CART, cartMap);
+        }
     }
 
     @Override
@@ -93,28 +107,9 @@ public class CartServiceImpl implements CartService {
     public void clearCartInSession(HttpSession session) {
         sessionCartManager.clearCart(session);
     }
-
+    
     @Override
-    public void addItem(String userId, ItemDTO itemDto, int quantity, HttpSession session) throws Exception {
-        Item item = itemMapper.toItem(itemDto);  // Convert to Item
-        BigDecimal effectivePrice = discountService.applyBestDiscount(item); // Use domain model
-
-        sessionCartManager.addItemToCart(
-                session,
-                itemDto.getId(),
-                itemDto.getTitle(),
-                effectivePrice,
-                quantity,
-                itemDto.getImageUrl(),
-                itemDto.getPrice()
-        );
-
-        int nextId = cartItemDAO.getMaxCartItemNumber() + 1;
-        String cartItemId = IDGenerator.generateId("cart", nextId);
-
-        CartItem cartItem = new CartItem(cartItemId, userId, itemDto.getId(), quantity);
-        cartItem.setPrice(effectivePrice);
-
-        cartItemDAO.save(cartItem);
-    }
+public CartItem findByCustomerAndItem(String customerId, String itemId) throws Exception {
+    return cartItemDAO.findByCustomerAndItem(customerId, itemId);
+}
 }

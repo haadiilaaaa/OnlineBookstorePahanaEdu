@@ -46,7 +46,10 @@ void deleteCartItemsByUserId(String userId) throws Exception;
 
 // In CartItemDAO.java interface
 
-void addCartItem(String customerId, String itemId, int quantity, BigDecimal price) throws Exception;
+
+List<CartItem> findAll() throws Exception;
+CartItem findByCustomerAndItem(String customerId, String itemId) throws Exception;
+
 
 
 

@@ -1,4 +1,4 @@
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+
 
 <%@ page import="model.CartItem" %>
 <%@ page import="java.util.*" %>

@@ -1,6 +1,4 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-
 <%@ page import="static util.contannts.PagePaths.LOGIN_PAGE" %>
 <%
     if (session.getAttribute("user") == null) {
@@ -178,24 +176,22 @@ h2 {
     gap: 15px;
   }
 }
-
     </style>
 </head>
 <body>
-    
+
   <div class="container">
     <h2>Thank You for Your Order!</h2>
 
     <div class="invoice-wrapper">
-      <c:choose>
-  <c:when test="${not empty invoice}">
-    <c:out value="${invoice}" escapeXml="false" />
-  </c:when>
-  <c:otherwise>
-    <p>No invoice available.</p>
-  </c:otherwise>
-</c:choose>
-
+      <% 
+      String invoice = (String) request.getAttribute("invoice");
+      if (invoice != null && !invoice.isEmpty()) {
+          out.print(invoice);
+      } else { 
+      %>
+          <p>No invoice available.</p>
+      <% } %>
     </div>
 
     <div class="button-group">
