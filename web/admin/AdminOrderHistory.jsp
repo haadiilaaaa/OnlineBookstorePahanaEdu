@@ -1,5 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+
 <%@ page import="java.util.*, dto.OrderDTO, dto.OrderItemDTO, dto.DeliveryPartnerDTO" %>
 <%@ page session="true" %>
 
@@ -150,12 +150,14 @@
 </head>
 <body>
     
-    <c:if test="${not empty success}">
-    <div class="alert alert-success">${success}</div>
+   <c:if test="${not empty sessionScope.successMessage}">
+    <div class="status-msg green">${sessionScope.successMessage}</div>
+    <c:remove var="successMessage" scope="session"/>
 </c:if>
 
-<c:if test="${not empty errorMessage}">
-    <div class="alert alert-danger">${errorMessage}</div>
+<c:if test="${not empty sessionScope.errorMessage}">
+    <div class="status-msg red">${sessionScope.errorMessage}</div>
+    <c:remove var="errorMessage" scope="session"/>
 </c:if>
 
     <h1>Admin Order Management</h1>

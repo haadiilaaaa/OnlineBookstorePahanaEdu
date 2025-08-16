@@ -374,7 +374,7 @@
         <a href="EditAdminProfileServlet" class="nav-link" tabindex="0"><i class="fa-solid fa-user-gear"></i>Edit Profile</a> <!-- ✅ New link -->
 
         <div class="spacer"></div>
-        <a href="logout.jsp" class="nav-link" tabindex="0"><i class="fa-solid fa-right-from-bracket"></i>Logout</a>
+        <a href="LogoutServlet" class="nav-link" tabindex="0"><i class="fa-solid fa-right-from-bracket"></i>Logout</a>
     </aside>
 
     <div class="overlay" id="overlay"></div>
