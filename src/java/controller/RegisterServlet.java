@@ -7,8 +7,6 @@ import util.ErrorPageResolver;
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import static util.contannts.PagePaths.*;
 import static util.contannts.ErrorMessages.*;
@@ -17,7 +15,6 @@ import static util.contannts.AttributeKeys.*;
 
 public class RegisterServlet extends HttpServlet {
 
-    private static final Logger logger = Logger.getLogger(RegisterServlet.class.getName());
     private RegistrationFacadeService registrationFacadeService;
 
     @Override
@@ -35,27 +32,37 @@ public class RegisterServlet extends HttpServlet {
         String userType = req.getParameter(USER_TYPE);
 
         if (userType == null || userType.isEmpty()) {
-            logger.warning("User type is missing or empty.");
+            System.out.println("User type is missing or empty.");
             req.setAttribute(ERROR, "User type is required.");
             req.getRequestDispatcher(LOGIN_PAGE).forward(req, resp);
             return;
         }
 
-        try {
-            String userId = registrationFacadeService.register(userType, req);
-            logger.info("Registration successful for userId: " + userId);
+        // In RegisterServlet's doPost()
+try {
+    String userId = registrationFacadeService.register(userType, req);
+    System.out.println("Registration successful for userId: " + userId);
+    System.out.println("SUCCESS: Redirecting for userId=" + userId); // Check test logs
+    resp.sendRedirect(OTP_VERIFICATION_PAGE + "?" + USER_ID + "=" + userId + "&" + USER_TYPE + "=" + userType);
 
-            resp.sendRedirect(OTP_VERIFICATION_PAGE + "?" + USER_ID + "=" + userId + "&" + USER_TYPE + "=" + userType);
+} catch (ValidationException ve) {
+    System.out.println("Validation failed: " + ve.getMessage());
+    
+    // Handle specific validation errors
+    String errorMessage = ve.getMessage();
+    if (errorMessage.contains("already registered")) {
+        req.setAttribute(ERROR, "Email already registered");
+    } else {
+        req.setAttribute(ERROR, errorMessage);
+    }
+    
+    req.getRequestDispatcher(ErrorPageResolver.resolve(userType)).forward(req, resp);
 
-        } catch (ValidationException ve) {
-            logger.warning("Validation failed: " + ve.getMessage());
-            req.setAttribute(ERROR, ve.getMessage());
-            req.getRequestDispatcher(ErrorPageResolver.resolve(userType)).forward(req, resp);
-
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, "Unexpected error during registration", e);
-            req.setAttribute(ERROR, GENERIC_ERROR);
-            req.getRequestDispatcher(ErrorPageResolver.resolve(userType)).forward(req, resp);
-        }
+} catch (Exception e) {
+    System.out.println("Unexpected error during registration: " + e.getMessage());
+    e.printStackTrace();
+    req.setAttribute(ERROR, GENERIC_ERROR);
+    req.getRequestDispatcher(ErrorPageResolver.resolve(userType)).forward(req, resp);
+}
     }
 }

@@ -1,4 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page import="util.contannts.AttributeKeys" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -129,9 +130,9 @@
 <div class="container">
     <h2>Reset Password</h2>
 
-    <% if(request.getAttribute("error") != null) { %>
-        <div class="error-message"><%= request.getAttribute("error") %></div>
-    <% } %>
+    <% if(request.getAttribute(AttributeKeys.ERROR) != null) { %>
+    <div class="error-message"><%= request.getAttribute(AttributeKeys.ERROR) %></div>
+<% } %>
 
     <% if(request.getAttribute("success") != null) { %>
         <div class="success"><%= request.getAttribute("success") %></div>

@@ -8,11 +8,8 @@ import util.contannts.*;
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
 import java.io.IOException;
-import java.util.logging.Logger;
 
 public class ResetPasswordServlet extends HttpServlet {
-
-    private static final Logger logger = Logger.getLogger(ResetPasswordServlet.class.getName());
 
     private ResetPasswordService resetPasswordService;
 
@@ -37,13 +34,14 @@ public class ResetPasswordServlet extends HttpServlet {
             resetPasswordService.resetPassword(token, password, confirmPassword);
             HttpSession session = req.getSession();
             session.setAttribute(SessionKeys.SUCCESS_MESSAGE, MessageResolver.get("reset.success"));
-            resp.sendRedirect(PagePaths.LOGIN_PAGE);
+           resp.sendRedirect(req.getContextPath() + PagePaths.LOGIN_PAGE);
 
         } catch (IllegalArgumentException | IllegalStateException e) {
             req.setAttribute(ParameterKeys.TOKEN, token);
             forwardWithError(req, resp, e.getMessage());
         } catch (Exception e) {
-            logger.severe("Unexpected error: " + e.getMessage());
+            System.out.println("Unexpected error: " + e.getMessage());
+            e.printStackTrace();
             req.setAttribute(ParameterKeys.TOKEN, token);
             forwardWithError(req, resp, MessageResolver.get("reset.internal_error"));
         }
@@ -52,6 +50,6 @@ public class ResetPasswordServlet extends HttpServlet {
     private void forwardWithError(HttpServletRequest req, HttpServletResponse resp, String errorMsg)
             throws ServletException, IOException {
         req.setAttribute(AttributeKeys.ERROR, errorMsg);
-        req.getRequestDispatcher(PagePaths.RESET_PASSWORD_PAGE).forward(req, resp);
+      req.getRequestDispatcher(PagePaths.RESET_PASSWORD_PAGE).forward(req, resp);
     }
 }

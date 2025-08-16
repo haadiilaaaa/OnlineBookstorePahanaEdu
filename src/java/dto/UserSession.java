@@ -29,6 +29,7 @@ public class UserSession implements Serializable {
 
     // Getters
     public String getId() { return id; }
+    
     public String getUsername() { return username; }
     public String getEmail() { return email; }
     public String getUserType() { return userType; }
@@ -39,5 +40,10 @@ public class UserSession implements Serializable {
     public String getFullName() {
     return (firstName != null ? firstName : "") + " " + (lastName != null ? lastName : "");
 }
+
+  public void setId (String id){
+      
+      this.id = id;
+  }
 
 }

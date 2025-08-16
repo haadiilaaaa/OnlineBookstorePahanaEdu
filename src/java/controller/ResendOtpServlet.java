@@ -14,11 +14,8 @@ import java.sql.Connection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
 
 public class ResendOtpServlet extends HttpServlet {
-
-    private static final Logger logger = Logger.getLogger(ResendOtpServlet.class.getName());
 
     private UserService userService;
     private OtpSendService otpSendService;
@@ -29,13 +26,11 @@ public class ResendOtpServlet extends HttpServlet {
         try {
             Connection connection = DBConnection.getInstance().getConnection();
 
-       Map<String, GenericUserDAO<? extends User>> daoMap = new HashMap<>();
-daoMap.put(UserType.CUSTOMER.getValue(), new CustomerDAOimpl(connection));
-daoMap.put(UserType.ADMIN.getValue(), new AminDAOImpl(connection));
-daoMap.put(UserType.STAFF.getValue(), new StaffDAOImpl(connection));
-daoMap.put(UserType.DELIVERY.getValue(), new DeliveryPartnerDAOImpl(connection)); // ✅ Add this
-
-
+            Map<String, GenericUserDAO<? extends User>> daoMap = new HashMap<>();
+            daoMap.put(UserType.CUSTOMER.getValue(), new CustomerDAOimpl(connection));
+            daoMap.put(UserType.ADMIN.getValue(), new AminDAOImpl(connection));
+            daoMap.put(UserType.STAFF.getValue(), new StaffDAOImpl(connection));
+            daoMap.put(UserType.DELIVERY.getValue(), new DeliveryPartnerDAOImpl(connection));
 
             userService = new UserServiceImpl(Collections.unmodifiableMap(daoMap));
 
@@ -45,7 +40,8 @@ daoMap.put(UserType.DELIVERY.getValue(), new DeliveryPartnerDAOImpl(connection))
             otpRateLimiter = GlobalOtpRateLimiter.getInstance();
 
         } catch (Exception e) {
-            logger.severe("Initialization failed: " + e.getMessage());
+            System.out.println("Initialization failed: " + e.getMessage());
+            e.printStackTrace();
             throw new ServletException("ResendOtpServlet init failed", e);
         }
     }
@@ -82,13 +78,14 @@ daoMap.put(UserType.DELIVERY.getValue(), new DeliveryPartnerDAOImpl(connection))
             if (email != null && !email.isEmpty()) {
                 otpSendService.sendOtp(userId, userType, email);
                 req.setAttribute(AttributeKeys.SUCCESS, MessageResolver.get("otp.sent_success"));
-                logger.info("OTP resent → userId=" + userId + ", userType=" + userType);
+                System.out.println("OTP resent → userId=" + userId + ", userType=" + userType);
             } else {
                 req.setAttribute(AttributeKeys.ERROR, MessageResolver.get("otp.user_not_found"));
             }
 
         } catch (Exception e) {
-            logger.severe("OTP resend error for userId=" + userId + ": " + e.getMessage());
+            System.out.println("OTP resend error for userId=" + userId + ": " + e.getMessage());
+            e.printStackTrace();
             req.setAttribute(AttributeKeys.ERROR, MessageResolver.get("otp.internal_error"));
         }
 
