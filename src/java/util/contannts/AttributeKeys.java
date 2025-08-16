@@ -21,6 +21,8 @@ public class AttributeKeys {
     public static final String MAX_PRICE = "maxPrice";
      public static final String CSRF_TOKEN = "csrfToken"; // ✅ Add this
      public static final String DELIVERY_PARTNERS = "deliveryPartners";
+      public static final String BOOKS_LIST = "booksList";
+    public static final String ALL_CATEGORIES = "allCategories";
    
     
 

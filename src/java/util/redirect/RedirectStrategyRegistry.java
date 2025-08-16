@@ -18,4 +18,20 @@ public class RedirectStrategyRegistry {
         if (role == null) return null;
         return strategyMap.get(role.toLowerCase());
     }
+    
+    public static void register(String role, LoginRedirectStrategy strategy) {
+        strategyMap.put(role.toLowerCase(), strategy);
+    }
+
+    /**
+     * This method is added specifically for unit testing.
+     * It clears all strategies to ensure test isolation.
+     */
+    public static void clearStrategies() {
+        strategyMap.clear();
+    }
 }
+   
+    
+    
+

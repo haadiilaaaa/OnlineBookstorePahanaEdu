@@ -12,4 +12,5 @@ public class ContextKeys {
     public static final String ITEM_SERVICE = "ItemService";
     public static final String CUSTOMER_DASHBOARD_SERVICE = "CustomerDashboardService";
        public static final String CATEGORIES = "categories";
+        public static final String CART_FACADE = "CartFacade"; 
 }

@@ -12,7 +12,7 @@ public class ErrorMessages {
     public static final String FAILED_TO_LOAD_CATEGORIES = "Failed to load categories.";
     public static final String OPERATION_FAILED = "Operation failed. Please try again.";
     public static final String UNAUTHORIZED_ACCESS = "You are not authorized to perform this action.";
-
+ public static final String USER_TYPE_REQUIRED = "User type is required.";
     // ✅ Discount-specific
     public static final String FAILED_TO_LOAD_DISCOUNTS = "Failed to load discount data.";
     public static final String DISCOUNT_CREATION_FAILED = "Discount creation failed.";

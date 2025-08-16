@@ -35,4 +35,5 @@ public class ParameterKeys {
     public static final String MIN_PRICE = "minPrice";
     public static final String MAX_PRICE = "maxPrice";
     public static final String QUANTITY = "quantity";
+     public static final String EMAIL = "email";
 }

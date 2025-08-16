@@ -7,5 +7,7 @@ public class SessionKeys {
      public static final String USER_ROLE = "userRole";
       public static final String CART = "cart";
        public static final String ORDER_ID = "orderId";
+        public static final String ERROR_MESSAGE = "errorMessage";
+
     
 }

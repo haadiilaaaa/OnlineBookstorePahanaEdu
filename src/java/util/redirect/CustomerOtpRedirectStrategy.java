@@ -9,6 +9,6 @@ import java.io.IOException;
 public class CustomerOtpRedirectStrategy implements OtpRedirectStrategy {
     @Override
     public void redirect(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        resp.sendRedirect(PagePaths.CUSTOMER_DASHBOARD);
+          resp.sendRedirect(req.getContextPath() + PagePaths.LOGIN_PAGE);
     }
 }
