@@ -229,7 +229,7 @@ public String getCustomerEmailByOrderId(String orderId) throws DAOExeption {
 public List<OrderDTO> findOrdersByDeliveryPartner(String partnerId) throws DAOExeption {
     List<OrderDTO> orders = new ArrayList<>();
 
-    String sql = "SELECT o.id AS order_id, o.customer_id, o.shipping_address, o.created_at, " +
+    String sql = "SELECT o.id AS id, o.customer_id, o.shipping_address, o.created_at, " +
              "o.total_amount, o.payment_method, o.status, o.delivery_partner_id, " +
              "o.delivery_fare, " + // ✅ Add this line
              "c.first_name AS customer_first_name, c.last_name AS customer_last_name, c.email " +
@@ -246,7 +246,7 @@ public List<OrderDTO> findOrdersByDeliveryPartner(String partnerId) throws DAOEx
             while (rs.next()) {
                 OrderDTO dto = new OrderDTO();
                               // now valid
-                dto.setOrderId(rs.getString("order_id")); // Use alias
+                dto.setOrderId(rs.getString("id")); // Use alias
 
                 System.out.println("Fetched Order ID: " + dto.getOrderId());
                 dto.setUserId(rs.getString("customer_id"));
@@ -340,7 +340,57 @@ public List<OrderDTO> findOrdersByDeliveryPartnerWithStatus(String partnerId, St
     }
     return orders;
 }
+ @Override
+    public List<OrderDTO> findAll() throws DAOExeption {
+        List<OrderDTO> orders = new ArrayList<>();
+        String sql = "SELECT * FROM orders"; 
+        try (PreparedStatement stmt = connection.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                orders.add(mapRowToOrderDTO(rs));
+            }
+        } catch (SQLException e) {
+            throw new DAOExeption("Failed to retrieve all orders", e);
+        }
+        return orders;
+    }
 
+    /**
+     * Helper method to map a ResultSet row to an OrderDTO object.
+     * This method is crucial for converting database data into a DTO.
+     * @param rs The ResultSet containing the order data.
+     * @return An OrderDTO object populated with data from the ResultSet.
+     * @throws SQLException if a database access error occurs.
+     */
+    // Corrected mapRowToOrderDTO method within OrderDAOImpl
+private OrderDTO mapRowToOrderDTO(ResultSet rs) throws SQLException {
+    OrderDTO order = new OrderDTO();
+    order.setOrderId(rs.getString("id"));
+    
+    // Corrected line: use setUserId() instead of setCustomerId()
+    order.setUserId(rs.getString("customer_id")); 
+    
+    order.setOrderDate(rs.getTimestamp("created_at"));
+    order.setTotalAmount(rs.getBigDecimal("total_amount"));
+    order.setStatus(rs.getString("status"));
+    order.setShippingAddress(rs.getString("shipping_address"));
+    order.setDeliveryPartnerId(rs.getString("delivery_partner_id"));
+    order.setDeliveryFare(rs.getBigDecimal("delivery_fare"));
+    
+    // Set other OrderDTO properties as needed
+    return order;
+}
+
+@Override
+public void deleteOrdersByUserId(String userId) throws DAOExeption {
+    String sql = "DELETE FROM orders WHERE customer_id = ?";
+    try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        stmt.setString(1, userId);
+        stmt.executeUpdate();
+    } catch (SQLException e) {
+        throw new DAOExeption("Failed to delete orders by user ID", e);
+    }
+}
 
 
 

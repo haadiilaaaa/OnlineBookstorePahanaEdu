@@ -71,4 +71,15 @@ public class OrderItemDAOImpl implements OrderItemDAO {
 
         return items;
     }
+    
+    @Override
+public void deleteOrderItemsByUserId(String userId) throws DAOExeption {
+    String sql = "DELETE FROM order_items WHERE order_id IN (SELECT id FROM orders WHERE customer_id = ?)";
+    try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        stmt.setString(1, userId);
+        stmt.executeUpdate();
+    } catch (SQLException e) {
+        throw new DAOExeption("Failed to delete order items by user ID", e);
+    }
+}
 }
