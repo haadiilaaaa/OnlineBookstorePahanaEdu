@@ -20,6 +20,8 @@ public interface AdminDAO extends GenericUserDAO<Admin>, PasswordUpdatabale {
     
     List<String> findAllAdminEmails() throws DAOExeption;
     void update(Admin admin) throws DAOExeption;
+    
+    List<Admin> findAll() throws DAOExeption;
 
      
 }

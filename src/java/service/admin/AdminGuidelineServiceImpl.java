@@ -3,38 +3,61 @@ package service.admin;
 import dao.GuidelineDAO;
 import model.Guideline;
 import util.DAOExeption;
-
+import util.IDGenerator;
+import util.*;
 import java.util.List;
-import java.util.UUID;
+
+import dto.GuidelineDTO;
+import service.common.Validator; // Interface
+import service.admin.GuidelineValidator; // Your implementation
 
 public class AdminGuidelineServiceImpl implements AdminGuidelineService {
 
     private final GuidelineDAO guidelineDAO;
+    private final Validator<GuidelineDTO> validator;
 
-    public AdminGuidelineServiceImpl(GuidelineDAO guidelineDAO) {
+    public AdminGuidelineServiceImpl(GuidelineDAO guidelineDAO, Validator<GuidelineDTO> validator) {
         this.guidelineDAO = guidelineDAO;
+        this.validator = validator;
     }
-@Override
+
+  @Override
 public void createGuideline(String title, String content) throws DAOExeption {
-    Guideline g = new Guideline();
+    // Validate first
+    GuidelineDTO dto = new GuidelineDTO(title, content);
+    validator.validate(dto);
 
-    // Assign the smallest available ID (like G001, G002, etc.)
-    g.setId(getNextAvailableGuidelineId());
+    // Create Guideline object
+    Guideline guideline = new Guideline();
 
-    g.setTitle(title);
-    g.setContent(content);
-    guidelineDAO.save(g);
+    // Use UUIDGenerator instance
+    IDGenerator<String> idGen = new UUIDGenerator();
+    guideline.setId(idGen.generate()); // returns String
+
+    guideline.setTitle(dto.getTitle());
+    guideline.setContent(dto.getContent());
+
+    // Debug print
+    System.out.println("Saving guideline to DB:");
+    System.out.println("ID: " + guideline.getId());
+    System.out.println("Title: " + guideline.getTitle());
+    System.out.println("Content: " + guideline.getContent());
+
+    // Save to DB
+    guidelineDAO.save(guideline);
 }
 
 
     @Override
     public void updateGuideline(String id, String title, String content) throws DAOExeption {
-        Guideline g = new Guideline();
-        g.setId(id);
-        g.setTitle(title);
-        g.setContent(content);
-        guidelineDAO.update(g);
+        GuidelineDTO dto = new GuidelineDTO(title, content);
+        validator.validate(dto);
+
+        // ... rest unchanged
     }
+
+    // ... other methods unchanged
+
 
     @Override
     public void deleteGuideline(String id) throws DAOExeption {
@@ -50,25 +73,4 @@ public void createGuideline(String title, String content) throws DAOExeption {
     public Guideline getById(String id) throws DAOExeption {
         return guidelineDAO.findById(id);
     }
-    
-    private String getNextAvailableGuidelineId() throws DAOExeption {
-    List<String> existingIds = guidelineDAO.findAllIds(); // get all current IDs
-
-    // If no IDs exist yet, return the first one
-    if (existingIds.isEmpty()) {
-        return "G001";
-    }
-
-    // Iterate from 1 up to existingIds.size() + 1 to find the missing number
-    for (int i = 1; i <= existingIds.size() + 1; i++) {
-        String candidateId = String.format("G%03d", i);
-        if (!existingIds.contains(candidateId)) {
-            return candidateId;
-        }
-    }
-
-    // Fallback - should never get here
-    return String.format("G%03d", existingIds.size() + 1);
-}
-
 }

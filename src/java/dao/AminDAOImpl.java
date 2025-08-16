@@ -183,6 +183,19 @@ public void update(Admin admin) throws DAOExeption {
         throw new DAOExeption("Failed to update admin profile", e);
     }
 }
-
+@Override
+public List<Admin> findAll() throws DAOExeption {
+    List<Admin> admins = new ArrayList<>();
+    String sql = "SELECT * FROM admin";
+    try (PreparedStatement stmt = connection.prepareStatement(sql);
+         ResultSet rs = stmt.executeQuery()) {
+        while (rs.next()) {
+            admins.add(map(rs));
+        }
+    } catch (SQLException e) {
+        throw new DAOExeption("Failed to find all admins", e);
+    }
+    return admins;
+}
 
 }

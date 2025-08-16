@@ -19,39 +19,46 @@ public class DiscountManagementServiceImpl implements DiscountManagementService 
     private final DiscountAssignmentDAO assignmentDAO;
     private final ItemDAO itemDAO;
     private final CategoryDAO categoryDAO;
+    private final IDGenerator<String> discountIdGenerator;
+    private final IDGenerator<String> uuidGenerator;
 
     public DiscountManagementServiceImpl(
         DiscountDAO discountDAO,
         DiscountAssignmentDAO assignmentDAO,
         ItemDAO itemDAO,
-        CategoryDAO categoryDAO
+        CategoryDAO categoryDAO,
+        IDGenerator<String> discountIdGenerator, // New dependency
+        IDGenerator<String> uuidGenerator        // New dependency
     ) {
         this.discountDAO = discountDAO;
         this.assignmentDAO = assignmentDAO;
         this.itemDAO = itemDAO;
         this.categoryDAO = categoryDAO;
+        this.discountIdGenerator = discountIdGenerator;
+        this.uuidGenerator = uuidGenerator;
     }
 
     @Override
     public void createDiscount(DiscountDTO dto) throws Exception {
         Discount discount = DiscountMapper.toModel(dto);
-        int max = discountDAO.getMaxDiscountIdNumber();
-        discount.setId(IDGenerator.generateId("dis", max)); // Don't add +1 here; already handled
+        // Use the injected IDGenerator instance
+        discount.setId(discountIdGenerator.generate());
         discountDAO.save(discount);
     }
 
     @Override
     public void assignDiscount(DiscountAssignmentDTO dto) throws Exception {
         DiscountAssignment assignment = DiscountAssignmentMapper.toModel(dto);
-        assignment.setId(IDGenerator.generateUUID());
+        // Use the injected IDGenerator instance
+        assignment.setId(uuidGenerator.generate());
         assignmentDAO.assignDiscount(assignment);
     }
 
     @Override
     public List<DiscountDTO> getAllDiscounts() throws Exception {
         return discountDAO.findAll().stream()
-                .map(DiscountMapper::toDTO)
-                .collect(Collectors.toList());
+            .map(DiscountMapper::toDTO)
+            .collect(Collectors.toList());
     }
 
     @Override
@@ -69,49 +76,46 @@ public class DiscountManagementServiceImpl implements DiscountManagementService 
     }
 
     @Override
-public Map<String, List<DiscountAssignmentDTO>> getAssignmentMap() throws Exception {
-    Map<String, List<DiscountAssignmentDTO>> map = new HashMap<>();
+    public Map<String, List<DiscountAssignmentDTO>> getAssignmentMap() throws Exception {
+        Map<String, List<DiscountAssignmentDTO>> map = new HashMap<>();
 
-    List<DiscountDTO> discounts = discountDAO.findAll().stream()
-        .map(DiscountMapper::toDTO)
-        .collect(Collectors.toList());
+        List<DiscountDTO> discounts = discountDAO.findAll().stream()
+            .map(DiscountMapper::toDTO)
+            .collect(Collectors.toList());
 
-    for (DiscountDTO discount : discounts) {
-        List<DiscountAssignment> assignments = assignmentDAO.findAssignmentsByDiscountId(discount.getId());
+        for (DiscountDTO discount : discounts) {
+            List<DiscountAssignment> assignments = assignmentDAO.findAssignmentsByDiscountId(discount.getId());
 
-        List<DiscountAssignmentDTO> assignmentDTOs = new ArrayList<>();
-        for (DiscountAssignment assignment : assignments) {
-            DiscountAssignmentDTO dto = new DiscountAssignmentDTO();
-            dto.setId(assignment.getId());
-            dto.setType(assignment.getType());
-            dto.setItemId(assignment.getItemId());
-            dto.setCategoryId(assignment.getCategoryId());
+            List<DiscountAssignmentDTO> assignmentDTOs = new ArrayList<>();
+            for (DiscountAssignment assignment : assignments) {
+                DiscountAssignmentDTO dto = new DiscountAssignmentDTO();
+                dto.setId(assignment.getId());
+                dto.setType(assignment.getType());
+                dto.setItemId(assignment.getItemId());
+                dto.setCategoryId(assignment.getCategoryId());
 
-            // Attach human-readable display name
-            if ("ITEM".equals(dto.getType())) {
-                Item item = itemDAO.findById(dto.getItemId());
-                dto.setDisplayName(item != null ? item.getTitle() : dto.getItemId());
-            } else if ("CATEGORY".equals(dto.getType())) {
-                Category cat = categoryDAO.findById(dto.getCategoryId());
-                dto.setDisplayName(cat != null ? cat.getName() : dto.getCategoryId());
-            } else {
-                dto.setDisplayName("All Items");
+                // Attach human-readable display name
+                if ("ITEM".equals(dto.getType())) {
+                    Item item = itemDAO.findById(dto.getItemId());
+                    dto.setDisplayName(item != null ? item.getTitle() : dto.getItemId());
+                } else if ("CATEGORY".equals(dto.getType())) {
+                    Category cat = categoryDAO.findById(dto.getCategoryId());
+                    dto.setDisplayName(cat != null ? cat.getName() : dto.getCategoryId());
+                } else {
+                    dto.setDisplayName("All Items");
+                }
+
+                assignmentDTOs.add(dto);
             }
 
-            assignmentDTOs.add(dto);
+            map.put(discount.getId(), assignmentDTOs);
         }
 
-        map.put(discount.getId(), assignmentDTOs);
+        return map;
     }
-
-    return map;
-}
-@Override
-public void removeAssignment(String assignmentId) throws Exception {
-    assignmentDAO.removeAssignmentById(assignmentId);
-}
-
-
-
-
+    
+    @Override
+    public void removeAssignment(String assignmentId) throws Exception {
+        assignmentDAO.removeAssignmentById(assignmentId);
+    }
 }
