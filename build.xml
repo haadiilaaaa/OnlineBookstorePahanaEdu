@@ -8,8 +8,35 @@
 <!-- You can turn off the Compile on Save (or Deploy on Save) setting -->
 <!-- in the project's Project Properties dialog box.-->
 <project name="Onile_bookstore_pahanaedu" default="default" basedir=".">
-    <description>Builds, tests, and runs the project Onile_bookstore_pahanaedu.</description>
+    <description>Builds, tests, and runs the project.</description>
     <import file="nbproject/build-impl.xml"/>
+    
+    <property name="test.src.dir" value="test/src"/>
+    <property name="build.test.classes.dir" value="build/test/classes"/>
+
+      <target name="compile-test" depends="compile">
+    <mkdir dir="build/test/classes"/>
+    <javac srcdir="test" destdir="build/test/classes" debug="true">
+        <classpath>
+            <pathelement location="build/classes"/>
+            <fileset dir="lib" includes="*.jar"/>
+        </classpath>
+    </javac>
+</target>
+
+    <target name="test" depends="compile-test">
+    <junit fork="yes">
+        <classpath>
+            <pathelement location="build/classes"/>
+            <pathelement location="build/test/classes"/>
+            <fileset dir="lib" includes="*.jar"/>
+        </classpath>
+        <test name="customer.PlaceOrderServletTest"/>
+    </junit>
+</target>
+</project>
+    
+      
     <!--
 
     There exist several targets which are by default empty and which can be 
@@ -68,4 +95,4 @@
     nbproject/build-impl.xml file. 
 
     -->
-</project>
+

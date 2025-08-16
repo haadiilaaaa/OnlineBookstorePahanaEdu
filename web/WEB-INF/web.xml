@@ -197,6 +197,14 @@
         <servlet-name>EditCustomerServlet</servlet-name>
         <servlet-class>controller.admin.EditCustomerServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>EditGuidelinesServlet</servlet-name>
+        <servlet-class>controller.admin.EditGuidelinesServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>UpdateGuidelineServlet</servlet-name>
+        <servlet-class>controller.admin.UpdateGuidelineServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>RegisterServlet</servlet-name>
         <url-pattern>/RegisterServlet</url-pattern>
@@ -420,6 +428,14 @@
     <servlet-mapping>
         <servlet-name>EditCustomerServlet</servlet-name>
         <url-pattern>/EditCustomerServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>EditGuidelinesServlet</servlet-name>
+        <url-pattern>/EditGuidelinesServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>UpdateGuidelineServlet</servlet-name>
+        <url-pattern>/UpdateGuidelineServlet</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>30</session-timeout>
