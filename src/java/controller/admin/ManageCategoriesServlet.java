@@ -4,7 +4,6 @@ import command.admin.category.CategoryActionCommand;
 import service.admin.CategoryCommandFactory;
 import dto.CategoryDTO;
 import util.contannts.*;
-import util.LoggerUtil;
 import command.admin.category.CommandResult;
 import util.enums.CommandResultType;
 
@@ -12,21 +11,19 @@ import javax.servlet.ServletException;
 import javax.servlet.http.*;
 import java.io.IOException;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Handles category management (add/edit/delete/list) with full DIP-compliant command delegation.
  */
 public class ManageCategoriesServlet extends HttpServlet {
 
-    private static final Logger LOGGER = LoggerUtil.getLogger(ManageCategoriesServlet.class);
     private CategoryCommandFactory commandFactory;
 
     @Override
     public void init() throws ServletException {
         commandFactory = (CategoryCommandFactory) getServletContext().getAttribute(ContextKeys.CATEGORY_COMMAND_FACTORY);
         if (commandFactory == null) {
+            System.out.println("CategoryCommandFactory not initialized in ServletContext.");
             throw new ServletException("CategoryCommandFactory not initialized in ServletContext.");
         }
     }
@@ -43,7 +40,8 @@ public class ManageCategoriesServlet extends HttpServlet {
             req.setAttribute(AttributeKeys.CATEGORIES, categories);
             req.getRequestDispatcher(PagePaths.MANAGE_CATEGORIES_PAGE).forward(req, resp);
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Failed to load categories", e);
+            System.out.println("Failed to load categories: " + e.getMessage());
+            e.printStackTrace();
             req.setAttribute(AttributeKeys.ERROR_MESSAGE, ErrorMessages.FAILED_TO_LOAD_CATEGORIES);
             req.getRequestDispatcher(PagePaths.ERROR_PAGE).forward(req, resp);
         }
@@ -70,11 +68,13 @@ public class ManageCategoriesServlet extends HttpServlet {
                 req.getRequestDispatcher(result.getView()).forward(req, resp);
             }
         } catch (IllegalArgumentException iae) {
-            LOGGER.log(Level.WARNING, "Validation error: " + iae.getMessage(), iae);
+            System.out.println("Validation error: " + iae.getMessage());
+            iae.printStackTrace();
             req.setAttribute(AttributeKeys.ERROR_MESSAGE, iae.getMessage());
             doGet(req, resp);
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Category operation failed", e);
+            System.out.println("Category operation failed: " + e.getMessage());
+            e.printStackTrace();
             req.setAttribute(AttributeKeys.ERROR_MESSAGE, ErrorMessages.OPERATION_FAILED);
             doGet(req, resp);
         }

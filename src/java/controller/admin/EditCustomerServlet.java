@@ -71,13 +71,16 @@ public void init() {
 
         try {
             boolean updated = customerService.updateCustomer(customer);
-            if (updated) {
-                resp.sendRedirect("AdminManageUsersServlet?success=Customer updated successfully");
-            } else {
-                req.setAttribute("error", "Failed to update customer");
-                req.setAttribute("customer", customer);
-                req.getRequestDispatcher("/WEB-INF/admin/edit_customer.jsp").forward(req, resp);
-            }
+          HttpSession session = req.getSession();
+if (updated) {
+    session.setAttribute("successMessage", "Customer updated successfully!");
+    resp.sendRedirect("AdminManageUsersServlet");
+} else {
+    req.setAttribute("errorMessage", "Failed to update customer");
+    req.setAttribute("customer", customer);
+    req.getRequestDispatcher("/WEB-INF/admin/edit_customer.jsp").forward(req, resp);
+}
+
         } catch (DAOExeption e) {
             req.setAttribute("error", "Error updating customer: " + e.getMessage());
             req.setAttribute("customer", customer);

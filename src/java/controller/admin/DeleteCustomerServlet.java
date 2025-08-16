@@ -28,15 +28,21 @@ public void init() {
 }
 
 
-    @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
-            throws ServletException, IOException {
-        String customerId = req.getParameter("customerId");
-        try {
-            customerManagemetService.deleteCustomerById(customerId);
-            resp.sendRedirect("manage-users");
-        } catch (DAOExeption e) {
-            throw new ServletException("Error deleting customer", e);
-        }
+   @Override
+protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+        throws ServletException, IOException {
+
+    String customerId = req.getParameter("customerId");
+    HttpSession session = req.getSession();
+
+    try {
+        customerManagemetService.deleteCustomerById(customerId);
+        session.setAttribute("successMessage", "Customer deleted successfully!");
+    } catch (DAOExeption e) {
+        session.setAttribute("errorMessage", "Failed to delete customer: " + e.getMessage());
     }
+
+    resp.sendRedirect("manage_users"); // redirect to refresh the list
+}
+
 }

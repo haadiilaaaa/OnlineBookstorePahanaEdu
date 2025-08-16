@@ -2,7 +2,6 @@ package controller.admin;
 
 import service.admin.AdminOrderService;
 import util.EmailSender;
-import util.LoggerUtil;
 import util.contannts.PagePaths;
 import util.contannts.AttributeKeys;
 import util.contannts.SuccessMessages;
@@ -11,12 +10,9 @@ import util.contannts.ErrorMessages;
 import javax.servlet.*;
 import javax.servlet.http.*;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class AssignDeliveryPartnerServlet extends HttpServlet {
 
-    private static final Logger logger = LoggerUtil.getLogger(AssignDeliveryPartnerServlet.class);
     private AdminOrderService adminOrderService;
     private EmailSender emailSender;
 
@@ -27,6 +23,7 @@ public class AssignDeliveryPartnerServlet extends HttpServlet {
         this.emailSender = (EmailSender) context.getAttribute("EmailSender");
 
         if (adminOrderService == null || emailSender == null) {
+            System.out.println("Dependencies not found in ServletContext.");
             throw new ServletException("Dependencies not found in ServletContext.");
         }
     }
@@ -56,10 +53,11 @@ public class AssignDeliveryPartnerServlet extends HttpServlet {
             }
 
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "Failed to assign delivery partner", e);
+            System.out.println("Failed to assign delivery partner: " + e.getMessage());
+            e.printStackTrace();
             request.setAttribute(AttributeKeys.ERROR_MESSAGE, ErrorMessages.INTERNAL_SERVER_ERROR);
         }
 
-       response.sendRedirect(request.getContextPath()+"/AdminOrderHistoryServlet");
+        response.sendRedirect(request.getContextPath() + "/AdminOrderHistoryServlet");
     }
 }

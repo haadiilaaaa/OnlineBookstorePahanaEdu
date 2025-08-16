@@ -1,35 +1,41 @@
 package controller.admin;
 
-import model.Guideline;
 import service.admin.AdminGuidelineService;
-import service.admin.AdminGuidelineServiceImpl;
-import dao.GuidelineDAOImpl;
-import db.DBConnection;
-import util.DAOExeption;
+import service.admin.AdminGuidelineServiceProvider;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.SQLException;
 
 public class AddGuidelinesServlet extends HttpServlet {
 
+    private AdminGuidelineService guidelineService;
+
     @Override
+    public void init() throws ServletException {
+        try {
+            this.guidelineService = AdminGuidelineServiceProvider.getService();
+            System.out.println("AddGuidelinesServlet initialized. Service: " + guidelineService);
+        } catch (Exception e) {
+            throw new ServletException("Failed to initialize AdminGuidelineService", e);
+        }
+    }
+
+  @Override
 protected void doPost(HttpServletRequest request, HttpServletResponse response)
         throws ServletException, IOException {
 
     String title = request.getParameter("title");
     String content = request.getParameter("content");
+    HttpSession session = request.getSession();
 
-    if (title != null && !title.trim().isEmpty() &&
-        content != null && !content.trim().isEmpty()) {
-        try (Connection conn = DBConnection.getInstance().getConnection()) {
-            AdminGuidelineService guidelineService = new AdminGuidelineServiceImpl(new GuidelineDAOImpl(conn));
-            guidelineService.createGuideline(title.trim(), content.trim());
-        } catch (DAOExeption | SQLException e) {
-            throw new ServletException("Failed to add guideline", e);
-        }
+    try {
+        guidelineService.createGuideline(title, content);
+        session.setAttribute("successMessage", "Guideline added successfully!");
+    } catch (IllegalArgumentException e) {
+        session.setAttribute("errorMessage", e.getMessage());
+    } catch (Exception e) {
+        session.setAttribute("errorMessage", "Failed to add guideline: " + e.getMessage());
     }
 
     response.sendRedirect("ManageGuidelinesServlet");

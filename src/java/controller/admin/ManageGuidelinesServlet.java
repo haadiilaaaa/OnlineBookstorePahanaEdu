@@ -2,8 +2,12 @@ package controller.admin;
 
 import dao.GuidelineDAOImpl;
 import db.DBConnection;
+import dto.GuidelineDTO;
 import model.Guideline;
 import service.admin.AdminGuidelineService;
+import service.admin.AdminGuidelineServiceImpl;
+import service.admin.GuidelineValidator;
+import service.common.Validator;
 import util.DAOExeption;
 
 import javax.servlet.*;
@@ -12,7 +16,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
-import service.admin.AdminGuidelineServiceImpl;
+
 public class ManageGuidelinesServlet extends HttpServlet {
 
     @Override
@@ -20,7 +24,12 @@ public class ManageGuidelinesServlet extends HttpServlet {
             throws ServletException, IOException {
 
         try (Connection conn = DBConnection.getInstance().getConnection()) {
-            AdminGuidelineService service = new AdminGuidelineServiceImpl(new GuidelineDAOImpl(conn));
+            // ✅ Provide the required Validator<GuidelineDTO> argument
+            Validator<GuidelineDTO> validator = new GuidelineValidator();
+            AdminGuidelineService service = new AdminGuidelineServiceImpl(
+                new GuidelineDAOImpl(conn),
+                validator
+            );
 
             List<Guideline> guidelines = service.getAllGuidelines();
             req.setAttribute("guidelines", guidelines);
