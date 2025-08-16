@@ -11,3 +11,5 @@ target/
 .idea/
 *.nb-gradle/
 nbproject/private/
+"src/java/ServletContextMethodsPrinter.java" 
+"test/" 
