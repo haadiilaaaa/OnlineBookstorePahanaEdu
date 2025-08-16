@@ -15,9 +15,11 @@ import java.nio.file.Paths;
 
 public class AddItemStrategy implements ItemActionStrategy {
     private final ItemService itemService;
+    private final IDGenerator<String> itemIdGenerator; // New dependency
 
-    public AddItemStrategy(ItemService itemService) {
+    public AddItemStrategy(ItemService itemService, IDGenerator<String> itemIdGenerator) {
         this.itemService = itemService;
+        this.itemIdGenerator = itemIdGenerator;
     }
 
     @Override
@@ -63,14 +65,13 @@ public class AddItemStrategy implements ItemActionStrategy {
         dto.setCategoryId(categoryId);
         dto.setImageUrl(imageUrl);
 
-        int count = itemService.getItemCount();
-        dto.setId(IDGenerator.generateId("item", count));
+        // Use the injected IDGenerator to get the new ID
+        dto.setId(itemIdGenerator.generate());
 
         itemService.addItem(dto);
 
         // Optional: add a flash attribute or log if needed
-       req.getSession().setAttribute("success", "Item added successfully.");
-
+        req.getSession().setAttribute("success", "Item added successfully.");
 
         // ✅ Redirect back to servlet to avoid form resubmission (Post/Redirect/Get pattern)
         return new StrategyResult("AddItemServlet", true);

@@ -7,7 +7,7 @@ import dto.UserSession;
 import model.CartItem;
 import service.admin.ItemService;
 import service.common.CategoryCache;
-import service.customer.CartService;
+import service.customer.SessionCartService;
 import util.ItemSearchParser;
 import util.contannts.*;
 
@@ -20,29 +20,20 @@ public class BookBrowseHandler {
 
     private final ItemService itemService;
     private final CategoryCache categoryCache;
-    private final CartService cartService;
+    private final SessionCartService sessionCartService;
 
-    public BookBrowseHandler(ItemService itemService, CategoryCache categoryCache, CartService cartService) {
+    public BookBrowseHandler(ItemService itemService, CategoryCache categoryCache, SessionCartService sessionCartService) {
         this.itemService = itemService;
         this.categoryCache = categoryCache;
-        this.cartService = cartService;
+        this.sessionCartService = sessionCartService;
     }
 
     public void handleRequest(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         HttpSession session = req.getSession(false);
-        if (session == null || session.getAttribute(SessionKeys.USER) == null) {
-            resp.sendRedirect(PagePaths.LOGIN_PAGE);
-            return;
-        }
-
         UserSession user = (UserSession) session.getAttribute(SessionKeys.USER);
 
-        // Load or initialize cart map
-        Map<String, CartItem> cart = (Map<String, CartItem>) session.getAttribute(SessionKeys.CART);
-        if (cart == null) {
-            cart = cartService.getCartMapByCustomerId(user.getId());
-            session.setAttribute(SessionKeys.CART, cart);
-        }
+        // Delegate cart loading to the SessionCartService
+        sessionCartService.loadCartForUser(session, user.getId());
 
         // Parse search/filter criteria from request
         ItemSearchCriteria criteria = ItemSearchParser.parse(req);

@@ -9,11 +9,11 @@ public class DBConnection {
     private static DBConnection instance;
     private static final String URL = "jdbc:mysql://localhost:3306/pahana_edu_v2";
     private static final String USER = "root";
-    private static final String PASSWORD = ""; // Replace with your actual MySQL password
+    private static final String PASSWORD = "";
 
     private DBConnection() throws SQLException {
         try {
-            Class.forName("com.mysql.cj.jdbc.Driver"); // MySQL 8+ driver
+            Class.forName("com.mysql.cj.jdbc.Driver"); 
         } catch (ClassNotFoundException e) {
             throw new SQLException("MySQL JDBC Driver not found", e);
         }

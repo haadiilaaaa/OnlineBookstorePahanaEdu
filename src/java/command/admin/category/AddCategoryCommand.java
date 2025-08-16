@@ -4,7 +4,6 @@ import dto.CategoryDTO;
 import service.admin.CategoryService;
 import util.IDGenerator;
 import util.contannts.*;
-
 import util.enums.CommandResultType;
 
 import javax.servlet.http.*;
@@ -12,9 +11,12 @@ import javax.servlet.http.*;
 public class AddCategoryCommand implements CategoryActionCommand {
 
     private final CategoryService categoryService;
+    private final IDGenerator<String> categoryIdGenerator;
 
-    public AddCategoryCommand(CategoryService categoryService) {
+    // The constructor must accept IDGenerator as a parameter to initialize the field.
+    public AddCategoryCommand(CategoryService categoryService, IDGenerator<String> categoryIdGenerator) {
         this.categoryService = categoryService;
+        this.categoryIdGenerator = categoryIdGenerator;
     }
 
     @Override
@@ -31,8 +33,8 @@ public class AddCategoryCommand implements CategoryActionCommand {
             return new CommandResult(PagePaths.MANAGE_CATEGORIES_PAGE, CommandResultType.FORWARD);
         }
 
-        int lastIdNum = categoryService.getLastCategoryIdNumber();
-        String newId = IDGenerator.generateId("cat", lastIdNum + 1);
+        // The ID is generated using the injected instance.
+        String newId = categoryIdGenerator.generate();
 
         CategoryDTO dto = new CategoryDTO();
         dto.setId(newId);
