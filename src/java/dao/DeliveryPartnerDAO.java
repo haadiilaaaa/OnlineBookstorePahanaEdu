@@ -15,6 +15,8 @@ public interface DeliveryPartnerDAO extends GenericUserDAO<DeliveryPartner>, Pas
       Optional<DeliveryPartner> findByUsernameOrEmail(String usernameOrEmail) throws DAOExeption;
       List<DeliveryPartnerDTO> getAllPartners() throws DAOExeption;
       void update(DeliveryPartner dp) throws Exception;
+      List<DeliveryPartner> findAll() throws Exception;
+      
 
 
 }

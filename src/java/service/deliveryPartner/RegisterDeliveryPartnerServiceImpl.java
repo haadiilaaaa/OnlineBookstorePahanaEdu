@@ -16,17 +16,19 @@ public class RegisterDeliveryPartnerServiceImpl implements DeliveryPartnerRegist
     private final InputValidationService inputValidationService;
     private final OtpSendService otpSendService;
     private final GlobalUserValidator globalValidator;
+    private final IDGenerator<String> deliveryPartnerIdGenerator; // New dependency
 
-    // Add this constructor
     public RegisterDeliveryPartnerServiceImpl(
             DeliveryPartnerDAO deliveryPartnerDAO,
             InputValidationService inputValidationService,
             OtpSendService otpSendService,
-            GlobalUserValidator globalValidator) {
+            GlobalUserValidator globalValidator,
+            IDGenerator<String> deliveryPartnerIdGenerator) { // Injected here
         this.deliveryPartnerDAO = deliveryPartnerDAO;
         this.inputValidationService = inputValidationService;
         this.otpSendService = otpSendService;
         this.globalValidator = globalValidator;
+        this.deliveryPartnerIdGenerator = deliveryPartnerIdGenerator;
     }
 
     @Override
@@ -37,9 +39,8 @@ public class RegisterDeliveryPartnerServiceImpl implements DeliveryPartnerRegist
         // Validate username/email globally across all user types
         globalValidator.validateUniqueUsernameAndEmail(dto.getUsername(), dto.getEmail());
 
-        // Generate ID with prefix "dp"
-        int count = deliveryPartnerDAO.countPartners();
-        String generatedId = IDGenerator.generateId("dp", count);
+        // Use the injected IDGenerator to get the new ID
+        String generatedId = deliveryPartnerIdGenerator.generate();
         dto.setId(generatedId);
 
         // Hash password

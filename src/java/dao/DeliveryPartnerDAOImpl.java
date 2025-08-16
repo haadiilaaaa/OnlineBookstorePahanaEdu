@@ -236,7 +236,20 @@ public void update(DeliveryPartner dp) throws Exception {
         stmt.executeUpdate();
     }
 }
-
+@Override
+public List<DeliveryPartner> findAll() throws Exception {
+    List<DeliveryPartner> partners = new ArrayList<>();
+    String sql = "SELECT * FROM delivery_partners";
+    try (PreparedStatement stmt = connection.prepareStatement(sql);
+         ResultSet rs = stmt.executeQuery()) {
+        while (rs.next()) {
+            partners.add(mapRowToDeliveryPartner(rs));
+        }
+    } catch (SQLException e) {
+        throw new DAOExeption("Error finding all delivery partners.", e);
+    }
+    return partners;
+}
 
 
 

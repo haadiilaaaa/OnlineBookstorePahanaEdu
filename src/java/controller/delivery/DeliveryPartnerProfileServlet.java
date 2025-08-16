@@ -32,6 +32,13 @@ public class DeliveryPartnerProfileServlet extends HttpServlet {
             DeliveryPartnerDTO profile = profileService.getProfile(partnerId);
             BigDecimal earnings = profileService.getTotalEarnings(partnerId);
 
+            // ✅ Check if a success message exists in session (flash message)
+            String successMessage = (String) session.getAttribute("successMessage");
+            if (successMessage != null) {
+                request.setAttribute("successMessage", successMessage);
+                session.removeAttribute("successMessage"); // show once only
+            }
+
             request.setAttribute("profile", profile);
             request.setAttribute("earnings", earnings);
 
@@ -68,8 +75,17 @@ public class DeliveryPartnerProfileServlet extends HttpServlet {
             dto.setVehicleNumber(request.getParameter("vehicleNumber"));
 
             profileService.updateProfile(dto);
+            // in doPost after setAttribute
+System.out.println("✅ SuccessMessage set: " + session.getAttribute("successMessage"));
 
-            response.sendRedirect("DeliveryPartnerProfileServlet"); // reload profile page
+// in doGet before moving to request
+System.out.println("➡ SuccessMessage from session: " + session.getAttribute("successMessage"));
+
+            // ✅ Add success message to session so it survives redirect
+            session.setAttribute("successMessage", "Profile updated successfully!");
+
+            // Redirect to GET (PRG pattern)
+            response.sendRedirect("DeliveryPartnerProfileServlet");
 
         } catch (Exception e) {
             e.printStackTrace();
