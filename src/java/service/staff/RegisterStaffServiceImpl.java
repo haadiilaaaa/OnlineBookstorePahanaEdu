@@ -16,15 +16,18 @@ public class RegisterStaffServiceImpl implements RegisterStaffService {
     private final InputValidationService inputValidationService;
     private final OtpSendService otpSenderService;
     private final GlobalUserValidator globalUserValidator;
+    private final IDGenerator<String> staffIdGenerator; // New dependency
 
     public RegisterStaffServiceImpl(StaffDAO staffDAO,
                                     InputValidationService inputValidationService,
                                     OtpSendService otpSenderService,
-                                    GlobalUserValidator globalUserValidator) {
+                                    GlobalUserValidator globalUserValidator,
+                                    IDGenerator<String> staffIdGenerator) { // Injected here
         this.staffDAO = staffDAO;
         this.inputValidationService = inputValidationService;
         this.otpSenderService = otpSenderService;
         this.globalUserValidator = globalUserValidator;
+        this.staffIdGenerator = staffIdGenerator;
     }
 
     @Override
@@ -33,20 +36,17 @@ public class RegisterStaffServiceImpl implements RegisterStaffService {
         inputValidationService.validate(dto);
 
         // Check for global uniqueness of username and email
-       
+        globalUserValidator.validateUniqueUsernameAndEmail(dto.getUsername(), dto.getEmail());
 
-        // Generate ID
-        int count = staffDAO.countStaff();
-        String generatedId = IDGenerator.generateId("st", count);
-        dto.setId(generatedId); // ✅ CRUCIAL STEP
+        // Use the injected IDGenerator to get the new ID
+        String generatedId = staffIdGenerator.generate();
+        dto.setId(generatedId);
 
         // Hash password
         String hashedPassword = PasswordHasher.hashPassword(dto.getPassword());
 
         // Map DTO to model
         Staff staff = UserMapper.toStaff(dto, generatedId, hashedPassword);
-        globalUserValidator.validateUniqueUsernameAndEmail(dto.getUsername(), dto.getEmail());
-
 
         // Save staff to DB
         staffDAO.save(staff);

@@ -3,6 +3,7 @@ package dao;
 import model.Staff;
 import java.util.Optional;
 import util.DAOExeption;
+import java.util.*;
 
 public interface StaffDAO extends GenericUserDAO<Staff>, PasswordUpdatabale {
 
@@ -23,4 +24,5 @@ public interface StaffDAO extends GenericUserDAO<Staff>, PasswordUpdatabale {
     Optional<Staff> findByUsernameOrEmail(String input) throws DAOExeption;
 
     void updatePassword(String userId, String hashedPassword) throws DAOExeption;
+    List<Staff> findAll() throws DAOExeption;
 }

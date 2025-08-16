@@ -259,7 +259,7 @@ public List<Customer> findAll() throws DAOExeption {
 
 @Override
 public boolean deleteById(String customerId) throws DAOExeption {
-    String sql = "DELETE FROM customers WHERE customer_id = ?";
+    String sql = "DELETE FROM customer WHERE id = ?";
     try (PreparedStatement stmt = connection.prepareStatement(sql)) {
         stmt.setString(1, customerId);
         int affectedRows = stmt.executeUpdate();

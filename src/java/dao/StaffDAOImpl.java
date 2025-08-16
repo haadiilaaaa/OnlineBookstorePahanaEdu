@@ -3,7 +3,7 @@ package dao;
 import model.Staff;
 import util.DAOExeption;
 import util.ValidationException;
-
+import java.util.*;
 import java.sql.*;
 import java.util.Optional;
 import java.util.logging.Level;
@@ -199,5 +199,21 @@ public class StaffDAOImpl implements StaffDAO {
         staff.setPasswordHash(rs.getString(COL_PASSWORD_HASH));
         staff.setVerified(rs.getBoolean(COL_IS_VERIFIED));
         return staff;
+    }
+    
+     @Override
+    public List<Staff> findAll() throws DAOExeption {
+        List<Staff> staffList = new ArrayList<>();
+        String sql = "SELECT * FROM staff"; // Use your actual table name if it's different
+        try (PreparedStatement stmt = connection.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                staffList.add(extractStaffFromResultSet(rs));
+            }
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error finding all staff", e);
+            throw new DAOExeption("Error finding all staff.", e);
+        }
+        return staffList;
     }
 }
