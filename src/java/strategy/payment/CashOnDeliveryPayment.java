@@ -10,7 +10,7 @@ public class CashOnDeliveryPayment implements PaymentStrategy {
 
     public CashOnDeliveryPayment(PaymentDAO paymentDAO) {
         this.paymentDAO = paymentDAO;
-    }
+    }   
 
     @Override
     public void processPayment(OrderDTO order) throws Exception {

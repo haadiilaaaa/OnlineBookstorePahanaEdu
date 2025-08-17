@@ -12,7 +12,7 @@ import javax.servlet.http.*;
 import java.io.IOException;
 import java.util.Map;
 import dao.*;
-import service.customer.*;
+import service.customer.*;  
 
 
 public class PlaceOrderServlet extends BaseCustomerServlet {

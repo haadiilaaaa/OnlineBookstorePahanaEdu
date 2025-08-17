@@ -198,7 +198,7 @@ h2 {
       <button class="btn" onclick="window.print()"><i class="fas fa-print"></i> Print Invoice</button>
       <a class="btn" href="<%= request.getContextPath() %>/Customer_DashboardServlet"><i class="fas fa-home"></i> Home</a>
       <a class="btn" href="<%= request.getContextPath() %>/BrowseBooksServlet"><i class="fas fa-book"></i> Keep Shopping</a>
-    </div>
+    </div>  
   </div>
 
 <script>

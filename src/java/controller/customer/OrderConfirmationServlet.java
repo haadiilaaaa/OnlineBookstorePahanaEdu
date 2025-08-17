@@ -89,7 +89,7 @@ protected void doGet(HttpServletRequest req, HttpServletResponse resp)
         session.removeAttribute(ORDER_ID);
         req.getRequestDispatcher(THANK_YOU_PAGE).forward(req, resp);
         System.out.println("DEBUG: OrderConfirmationServlet: Forwarding to thank you page.");
-
+   
     } catch (Exception e) {
         System.err.println("DEBUG: OrderConfirmationServlet: An error occurred.");
         e.printStackTrace();

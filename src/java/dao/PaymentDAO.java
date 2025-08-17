@@ -4,5 +4,5 @@ import model.payment;
 
 public interface PaymentDAO {
     void save(payment payment) throws Exception;
-}
-//payment dao
+}  
+//payment dao    

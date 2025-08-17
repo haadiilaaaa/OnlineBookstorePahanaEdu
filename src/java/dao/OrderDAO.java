@@ -6,7 +6,7 @@ import java.util.Optional;
 import util.DAOExeption;
 import java.math.BigDecimal;
 
-public interface OrderDAO {
+public interface OrderDAO {   
     void saveOrder( OrderDTO order) throws Exception;
     int getNextOrderNumber() throws Exception;
     List<OrderDTO> findOrdersByCustomerId(String customerId) throws Exception;
