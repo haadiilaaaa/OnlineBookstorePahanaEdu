@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SessionCartManager {
-
+  
     public static final String CART_SESSION_KEY = "cart";
 
     @SuppressWarnings("unchecked")

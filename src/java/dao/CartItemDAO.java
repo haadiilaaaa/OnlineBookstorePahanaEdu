@@ -14,7 +14,7 @@ public interface CartItemDAO {
      * @throws Exception if a database error occurs
      */
     void save(CartItem cartItem) throws Exception;
-
+     
     /**
      * Gets the latest cart item ID from the database to assist in generating a new one.
      *

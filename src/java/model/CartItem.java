@@ -8,7 +8,7 @@ public class CartItem implements Serializable {
 
     private String id;           // cart_item ID (for DB)
     private String customerId;
-    private String itemId;
+    private String itemId;  
     private String itemTitle;
     private BigDecimal price;
     private int quantity;
