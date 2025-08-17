@@ -715,7 +715,7 @@ body.dark-theme .item-row {
     document.body.classList.add('dark-theme');
     icon.classList.remove('fa-moon');
     icon.classList.add('fa-sun');   
-  }
+  }   
 
   themeToggle.addEventListener('click', () => {
     document.body.classList.toggle('dark-theme');
