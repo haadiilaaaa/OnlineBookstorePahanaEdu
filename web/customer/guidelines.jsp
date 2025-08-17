@@ -24,7 +24,7 @@
             line-height: 1.5;
         }
     </style>
-</head>
+</head>  
 <body>
 
 <h2>Customer Guidelines</h2>

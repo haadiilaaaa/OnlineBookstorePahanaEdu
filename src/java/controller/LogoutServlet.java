@@ -25,7 +25,7 @@ public class LogoutServlet extends HttpServlet {
         // Get the current session, but don't create a new one if it doesn't exist.
         // This is important for the test case where no session is present.
         HttpSession session = request.getSession(false);
-
+         
         // Check if a session exists before trying to invalidate it.
         if (session != null) {
             // Invalidate the session, which removes all its attributes.
