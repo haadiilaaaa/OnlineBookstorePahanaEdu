@@ -1,6 +1,6 @@
 package dao;
 
-import model.OtpToken;
+import model.OtpToken;  
 
 public interface OtpTokenDAO {
     void save(OtpToken token) throws Exception;

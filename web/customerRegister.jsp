@@ -215,7 +215,7 @@ if (password !== confirmPassword) {
 
     <div class="form-group">
         <input type="text" name="username" required placeholder=" " />
-        <label>Username</label>
+        <label>Username</label> 
     </div>
 
     <div class="form-group">

@@ -22,7 +22,7 @@ public class RegisterServlet extends HttpServlet {
         registrationFacadeService = (RegistrationFacadeService) getServletContext().getAttribute("RegistrationFacadeService");
         if (registrationFacadeService == null) {
             throw new ServletException("RegistrationFacadeService not found.");
-        }
+        }  
     }
 
     @Override

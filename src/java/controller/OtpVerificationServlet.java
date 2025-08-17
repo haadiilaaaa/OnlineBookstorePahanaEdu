@@ -54,7 +54,7 @@ public class OtpVerificationServlet extends HttpServlet {
         try {
             boolean verified = otpVerificationService.verifyOtp(userId, userType, enteredOtp);
 
-            if (verified) {
+            if (verified) {  
                 System.out.println("OTP verified successfully for userId: " + userId);
 
                 // Store success message in session (so it survives redirect)

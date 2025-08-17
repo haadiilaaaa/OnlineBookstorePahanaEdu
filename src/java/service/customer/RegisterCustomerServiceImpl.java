@@ -42,7 +42,7 @@ public class RegisterCustomerServiceImpl implements RegisterCustomerService {
         String generatedId = customerIdGenerator.generate();
         dto.setId(generatedId);
 
-        // Hash password
+        // Hash password  
         String hashedPassword = PasswordHasher.hashPassword(dto.getPassword());
 
         // Map to model

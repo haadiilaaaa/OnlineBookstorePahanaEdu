@@ -2,7 +2,7 @@ package dao;
 
 import model.Customer;
 import java.util.Optional;
-import util.*;
+import util.*;  
 import java.util.List;
 
 public interface CustomerDAO extends GenericUserDAO<Customer>, PasswordUpdatabale {
