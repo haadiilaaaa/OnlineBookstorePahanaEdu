@@ -9,7 +9,7 @@
 <%
     // All page-level imports and object retrievals are now done in scriptlets
     HttpSession sessionObj = session;
-    UserSession user = (UserSession) sessionObj.getAttribute("user");
+    UserSession user = (UserSession) sessionObj.getAttribute("user");  
     CustomerDashboardDTO dashboard = (CustomerDashboardDTO) request.getAttribute("dashboardData");
     List<Category> categories = (List<Category>) request.getAttribute("categories");
     String selectedCategory = (String) request.getAttribute("selectedCategory");

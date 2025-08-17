@@ -9,7 +9,7 @@
 <%
     // Get cart data from session
     Map<String, CartItem> cart = (Map<String, CartItem>) session.getAttribute("cart");
-    BigDecimal total = BigDecimal.ZERO;
+    BigDecimal total = BigDecimal.ZERO;  
     int cartCount = 0;
     if (cart != null) {
         for (CartItem item : cart.values()) {

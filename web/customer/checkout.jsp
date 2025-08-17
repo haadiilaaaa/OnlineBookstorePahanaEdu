@@ -9,7 +9,7 @@
     Map<String, CartItem> cart = (Map<String, CartItem>) session.getAttribute("cart");
 
     BigDecimal total = BigDecimal.ZERO;
-    if (cart != null && !cart.isEmpty()) {
+    if (cart != null && !cart.isEmpty()) {  
         for (CartItem item : cart.values()) {
             total = total.add(item.getPrice().multiply(new BigDecimal(item.getQuantity())));
         }

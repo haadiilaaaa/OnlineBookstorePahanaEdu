@@ -17,6 +17,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
     private String serverName = "localhost";
     private int serverPort = 8080;
     private String contextPath = "";
+     private String forwardedPath;
 
     public void setParameter(String name, String value) {
         parameters.put(name, new String[]{value});
@@ -145,6 +146,10 @@ public RequestDispatcher getRequestDispatcher(String path) {
      public void setContextPath(String contextPath) {
         this.contextPath = contextPath;
     }
+     
+     public String getForwardedPath() {
+            return forwardedPath;
+        }
     
     
     

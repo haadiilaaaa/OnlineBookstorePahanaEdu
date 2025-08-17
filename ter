@@ -1,0 +1,78 @@
+* [33m32e696e[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mdevelopment[m[33m, [m[1;31morigin/development[m[33m)[m feat(new): Add new JSTL, JUnit libraries, and test files
+* [33m93da44b[m refactor: Miscellaneous code refactoring and fixes
+* [33mf7cc32e[m ui(admin): Refine admin-related JSP pages
+* [33m68f9591[m chore(utils): Update utility classes and constants
+* [33m3eb976d[m refactor(dao): Update customer and staff data access logic
+* [33mbd3231e[m feat(admin): Revise admin DAO and service layer logic
+* [33m502671e[m chore(gitignore): Add temporary and test files to ignore list
+* [33mbcfc398[m feat(cart): Introduce cart service facade and persistent carts
+* [33m57ed7dc[m feat(admin): Add features for editing and updating guidelines
+* [33mc968fad[m feat(utils): Introduce new ID generation utilities
+* [33m116c172[m refactor(data): Refine data access object logic for orders
+* [33mf8fa5a4[m chore(config): Update project configuration and build files
+* [33m3a20af3[m feat(delivery): Implement delivery partner dashboard and profile features
+* [33macb8efc[m feat(customer): Add new customer-facing features and cart updates
+* [33m791a920[m refactor(auth): Revise authentication and user flow logic
+* [33m8a73585[m feat(admin): Update admin functionalities and servlets
+* [33mc5d590a[m feat(dependencies): Remove deprecated libraries and test files
+* [33mceece38[m Add image assets for dashboard and homepage UI
+* [33m5dc539d[m Add admin, customer, and delivery partner JSP views
+* [33mc320f41[m Add redirect strategies and shared service exception handling
+* [33mcb8679f[m Add request-to-DTO converters for different user types
+* [33m0ff94f9[m Add delivery partner services (placeholder/future work)
+* [33mbcac4a7[m Add service for customer profile editing
+* [33m82fd4a2[m Add shared services for delivery partner authentication, validation, and profile editing
+* [33m206b82a[m Add admin services for managing guidelines, profiles, and customers
+* [33m0bb4b28[m Add model classes for DeliveryPartner and Guideline entities
+* [33m2b86868[m Add mappers to convert between DTOs and model objects for customers and delivery partners
+* [33m3893706[m Add DeliveryPartnerDTO and generic UserDTO for user abstraction
+* [33m5ca2b00[m Add DAO interfaces and implementations for delivery partners and guidelines
+* [33m20f911b[m Add delivery partner controllers and delivery registration strategy
+* [33md99ccfd[m Add LogoutServlet to handle user logout functionality
+* [33m0025b3f[m Add customer controllers for guidelines and profile editing
+* [33m7aba6ba[m Add admin controllers for managing users, guidelines, delivery partners, and profile editing
+* [33m352ba55[m Refactor and enhance core controllers, DAOs, services, mappers, and utility classes
+* [33m040ec9c[m Add new DTOs, validators and customer discount services
+* [33m32c6a15[m Update JSP and web configuration files
+* [33mcd78b38[m Update utility classes and constant definitions
+* [33m2165593[m Refactor and improve admin and customer service layer
+* [33m16e1542[m Update DTO classes for Item and SearchCriteria
+* [33md998e75[m Refactor and update DAO layer implementations
+* [33m1546084[m Update and refactor customer and admin controller classes
+* [33m292848e[m Implement complete order management workflow
+* [33m38e0ace[m Refactor and fix OTP resend logic, update DAOs, services, controllers, and add new authentication handlers
+* [33mf951835[m 🧭 Improve dashboard flow, routing, and category caching for faster browsing
+* [33mdb5a13d[m ✨ Add discount-aware search parsing and service layer structure for item display
+* [33m1a571aa[m ♻️ Refactor CartServlets: extract BaseCustomerServlet, use CartService and constants
+* [33m18e15d7[m Refactor: Apply constants, extract CartUtil logic, and prepare CSRF support in Customer Dashboard
+* [33mce61749[m Enhance ManageDiscount feature: Add commands and session success messages, update JSPs for feedback; update supporting controllers, DAOs, listeners, and constants.
+* [33mddd2bac[m Improve ResetPasswordServlet with rate limiting and better error handling
+* [33m61b0ebc[m i- Resolved conflicts in RegisterServlet, OtpVerificationServlet, AminDAOImpl - Updated services and DAOs to sync with production branch changes
+[31m|[m * [33m69849ad[m[33m ([m[1;31morigin/production[m[33m, [m[1;32mproduction[m[33m)[m refactor: finalize admin order status update and validation fixes
+[31m|[m * [33ma005945[m chore: update NetBeans project configuration files
+[31m|[m * [33meb4be22[m style: improve login and registration UI layout
+[31m|[m * [33mb0a6754[m refactor: clean up utility classes and improve email/id generation
+[31m|[m * [33m1eb10e4[m feat: allow admin to update order status and notify customers via email
+[31m|[m * [33me94b719[m feat: finalize OTP verification and registration email flow
+[31m|[m * [33mfb55f20[m test commit
+[31m|[m [32m|[m * [33m38b87ae[m[33m ([m[1;32mdesign[m[33m)[m docs: add CONTRIBUTING guidelines
+[31m|[m [32m|[m[31m/[m  
+[31m|[m[31m/[m[32m|[m   
+* [32m|[m [33mf89ac69[m[33m ([m[1;33mtag: [m[1;33mv0.1.0-alpha[m[33m, [m[1;31morigin/design[m[33m, [m[1;32mfeature/book-search[m[33m)[m docs: add README.md with project overview
+* [32m|[m [33m114f98a[m docs: add README.md with project overview
+* [32m|[m [33m71e662e[m chore: add MIT license
+* [32m|[m [33m3c3ef52[m feat(mapper): add UserMapper for mapping DTOs to user models
+* [32m|[m [33mfdfd507[m feat(service): add OTP sender and verification services with implementations
+* [32m|[m [33m5712ce5[m feat(service): add input validation service and implementation
+* [32m|[m [33m0abcc72[m feat(dto): add StaffDTO for transferring staff data
+* [32m|[m [33me2cb750[m feat(dto): add AdminDTO for transferring admin data
+* [32m|[m [33m151c4ba[m feat(dto): add CustomerDTO for transferring customer data
+* [32m|[m [33m9c576bd[m feat(db): add DBConnection utility class for database access
+* [32m|[m [33m12eb492[m feat(dao): add StaffDAO interface and its implementation
+* [32m|[m [33m2c3049e[m feat(dao): add OtpTokenDAO interface and its implementation
+* [32m|[m [33m512d6d5[m feat(dao): add AdminDAO interface and AminDAOImpl implementation
+* [32m|[m [33macc0ed8[m feat(dao): add CustomerDAO interface and its implementation
+* [32m|[m [33m8252a14[m feat(controller): add OtpVerificationServlet for handling OTP verification logic
+* [32m|[m [33m73e21e2[m feat(controller): add RegisterServlet for user registration
+[32m|[m[32m/[m  
+* [33m66a7a9e[m[33m ([m[1;31morigin/regression[m[33m, [m[1;31morigin/qa[m[33m, [m[1;32mregression[m[33m, [m[1;32mqa[m[33m)[m Initial commit - Online Bookstore Project

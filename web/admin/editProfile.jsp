@@ -12,7 +12,7 @@
     :root {
         --gradient-start: #6d4c41;
         --gradient-end: #8d6e63;
-        --light-bg: #f3ede5;
+        --light-bg: #f3ede5;  
         --card-bg: #fff9f4;
         --card-bg-dark: #372f2a;
         --text-color: #3b2e2a;

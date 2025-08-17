@@ -801,7 +801,7 @@
     function showPopup(message) {
       const popup = document.getElementById('popupBox');
       const popupMessage = document.getElementById('popupMessage');
-      popupMessage.textContent = message;
+      popupMessage.textContent = message;  
       popup.style.display = 'block';
 
       setTimeout(() => {

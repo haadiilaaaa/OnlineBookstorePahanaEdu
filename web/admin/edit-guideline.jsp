@@ -9,7 +9,7 @@
     
     <c:if test="${not empty sessionScope.successMessage}">
     <div style="padding:12px; background:#4CAF50; color:white; border-radius:6px; margin-bottom:16px;">
-        ${sessionScope.successMessage}
+        ${sessionScope.successMessage} 
     </div>
     <c:remove var="successMessage" scope="session"/>
 </c:if>

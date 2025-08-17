@@ -11,7 +11,7 @@
 
         :root {
           --brown-dark: #5d4037;
-          --brown-light: #8d6e63;
+          --brown-light: #8d6e63;  
           --cream-bg: #f9f6f1;
           --dark-bg: #252525;
           --text-dark: #212121;

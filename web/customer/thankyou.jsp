@@ -8,7 +8,7 @@
 %>
 <html>
 <head>
-    <title>Thank You for Your Order</title>
+    <title>Thank You for Your Order</title>  
     <style>
        :root {
   --primary-dark: #5a3e36;
@@ -190,7 +190,7 @@ h2 {
           out.print(invoice);
       } else { 
       %>
-          <p>No invoice available.</p>
+          <p>No invoice available.</p>  
       <% } %>
     </div>
 

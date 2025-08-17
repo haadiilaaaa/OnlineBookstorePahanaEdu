@@ -152,8 +152,8 @@
     
    <c:if test="${not empty sessionScope.successMessage}">
     <div class="status-msg green">${sessionScope.successMessage}</div>
-    <c:remove var="successMessage" scope="session"/>
-</c:if>
+    <c:remove var="successMessage" scope="session"/> 
+</c:if>  
 
 <c:if test="${not empty sessionScope.errorMessage}">
     <div class="status-msg red">${sessionScope.errorMessage}</div>

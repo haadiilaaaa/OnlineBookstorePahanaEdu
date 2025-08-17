@@ -2,7 +2,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <html>
 <head>
-    <title>Manage Customers</title>
+    <title>Manage Customers</title>  
   <style>
     :root {
         --gradient-start: #6d4c41;

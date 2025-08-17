@@ -31,7 +31,7 @@
 
 <c:forEach var="g" items="${guidelines}">
     <div class="guideline">
-        <h3>${g.title}</h3>
+        <h3>${g.title}</h3>  
         <p>${g.content}</p>
     </div>
 </c:forEach>

@@ -365,7 +365,7 @@
 <body>
     <!-- ===== SIDEBAR ===== -->
     <aside class="sidebar" id="sidebar" tabindex="0" aria-label="Sidebar Navigation">
-        <div class="brand" tabindex="0">Admin</div>
+        <div class="brand" tabindex="0">Admin</div> 
 
         <a href="AddItemServlet"          class="nav-link" tabindex="0"><i class="fa-solid fa-box"></i>Manage Items</a>
         <a href="ManageCategoriesServlet" class="nav-link" tabindex="0"><i class="fa-solid fa-tags"></i>Manage Categories</a>

@@ -224,7 +224,7 @@
     <!-- Display success/error messages -->
 <c:if test="${not empty successMessage}">
     <div style="background-color: #d4edda; color: #155724; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; border: 1px solid #c3e6cb;">
-        ${successMessage}
+        ${successMessage}  
     </div>
 </c:if>
 

@@ -522,7 +522,7 @@ body.dark-mode .dark-mode-toggle {
     <p class="error">${error}</p>
 </c:if>
 
-<c:if test="${not empty sessionScope.successMessage}">
+<c:if test="${not empty sessionScope.successMessage}">  
     <div id="toast" class="toast">${sessionScope.successMessage}</div>
     <script>
         const toast = document.getElementById('toast');

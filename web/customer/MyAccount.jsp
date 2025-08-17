@@ -10,7 +10,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>My Account - Gallery Café</title>
+    <title>My Account - Gallery Café</title>  
     <link rel="stylesheet" href="styles/dashboard.css"> <!-- Link to your CSS -->
 </head>
 <style>
