@@ -189,7 +189,7 @@ textarea {
         <input type="password" id="confirmPassword" name="confirmPassword" />
 
         <button type="submit" class="btn-submit">Update Profile</button>
-    </form>
+    </form>   
 
 </div>
 

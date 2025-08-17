@@ -9,7 +9,7 @@ import util.ValidationException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
-import java.io.IOException;
+import java.io.IOException;  
 
 @WebServlet("/customer/edit-profile")
 public class EditCustomerProfileServlet extends HttpServlet {
