@@ -218,7 +218,7 @@
                 }
             }, 1000);
         });
-    </script>
+    </script>    
 <% } else if (error != null) { %>
     <div class="error-message" style="color: red; text-align: center; margin-bottom: 15px;">
         <%= error %>

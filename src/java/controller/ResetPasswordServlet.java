@@ -44,7 +44,7 @@ public class ResetPasswordServlet extends HttpServlet {
             e.printStackTrace();
             req.setAttribute(ParameterKeys.TOKEN, token);
             forwardWithError(req, resp, MessageResolver.get("reset.internal_error"));
-        }
+        }  
     }
 
     private void forwardWithError(HttpServletRequest req, HttpServletResponse resp, String errorMsg)

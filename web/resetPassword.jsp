@@ -128,7 +128,7 @@
 <body>
 
 <div class="container">
-    <h2>Reset Password</h2>
+    <h2>Reset Password</h2>  
 
     <% if(request.getAttribute(AttributeKeys.ERROR) != null) { %>
     <div class="error-message"><%= request.getAttribute(AttributeKeys.ERROR) %></div>

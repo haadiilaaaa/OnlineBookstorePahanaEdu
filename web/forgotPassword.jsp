@@ -141,7 +141,7 @@
     <form action="ForgotPasswordServlet" method="post">
         <div class="form-group">
             <input type="email" id="email" name="email" placeholder="Enter your registered email" required />
-        </div>
+        </div>  
 
         <button type="submit">Send Reset Link</button>
     </form>
