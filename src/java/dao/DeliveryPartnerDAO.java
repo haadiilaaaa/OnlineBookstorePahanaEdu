@@ -3,7 +3,7 @@ import java.util.List;
 import dto.DeliveryPartnerDTO;
 import model.DeliveryPartner;
 import util.DAOExeption;
-import java.util.Optional;
+import java.util.Optional;   
 
 public interface DeliveryPartnerDAO extends GenericUserDAO<DeliveryPartner>, PasswordUpdatabale {
     void save(DeliveryPartner deliveryPartner) throws Exception;
