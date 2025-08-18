@@ -4,7 +4,7 @@
 <html>
 <head>
     <title>Edit Customer</title>
-</head>
+</head>   
 <style>
     :root {
         --gradient-start: #6d4c41;

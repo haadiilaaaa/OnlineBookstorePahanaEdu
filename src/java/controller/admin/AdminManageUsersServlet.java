@@ -5,7 +5,7 @@ import service.admin.CustomerManagemetService;
 import service.admin.CustomerManagementServiceImpl;
 import dao.CustomerDAOimpl;
 import db.DBConnection;
-import util.DAOExeption;
+import util.DAOExeption;  
 
 import javax.servlet.*;
 import javax.servlet.http.*;

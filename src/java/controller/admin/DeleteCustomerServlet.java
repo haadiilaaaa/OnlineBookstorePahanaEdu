@@ -6,7 +6,7 @@ import dao.CustomerDAOimpl;
 import db.DBConnection;
 import util.DAOExeption;
 
-import javax.servlet.*;
+import javax.servlet.*;  
 import javax.servlet.http.*;
 import java.io.IOException;
 import java.sql.Connection;

@@ -3,7 +3,7 @@
 <html>
 <head>
     <title>Manage Customers</title>  
-  <style>
+  <style>   
     :root {
         --gradient-start: #6d4c41;
         --gradient-end: #8d6e63;

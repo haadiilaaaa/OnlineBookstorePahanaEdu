@@ -6,7 +6,7 @@
     List<DeliveryPartnerDTO> pendingPartners = (List<DeliveryPartnerDTO>) request.getAttribute("pendingPartners");
 %>
 
-<!DOCTYPE html>
+<!DOCTYPE html>   
 <html>
 <head>
     <meta charset="UTF-8">
