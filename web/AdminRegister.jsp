@@ -10,7 +10,7 @@
         padding: 0;
     }
 
-   body {
+   body {  
     font-family: 'Segoe UI', sans-serif;
     background: linear-gradient(145deg, #f3ede5, #eae7e3);
     display: flex;
