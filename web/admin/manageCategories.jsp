@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <title>Manage Categories</title>
 </head>
-<style>
+<style>   
 :root {
   --brown-dark: #5d4037;
   --brown-light: #8d6e63;

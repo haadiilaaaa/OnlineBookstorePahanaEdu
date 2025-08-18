@@ -3,7 +3,7 @@ package service.admin;
 import dto.CategoryDTO;
 import java.util.List;
 
-public interface CategoryService {
+public interface CategoryService {   
     void addCategory(CategoryDTO dto) throws Exception;
     List<CategoryDTO> getAllCategories() throws Exception;
     CategoryDTO getCategoryById(String id) throws Exception;

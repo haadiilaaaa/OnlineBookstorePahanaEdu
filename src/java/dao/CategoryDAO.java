@@ -3,7 +3,7 @@ package dao;
 import model.Category;
 import java.util.List;
 import java.util.Set;
-public interface CategoryDAO {
+public interface CategoryDAO {   
     void save(Category category) throws Exception;
     List<Category> findAll() throws Exception;
     Category findById(String id) throws Exception;

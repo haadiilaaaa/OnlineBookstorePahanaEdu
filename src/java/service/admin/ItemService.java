@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 /**
  * Service interface for managing items in the admin context.
  */
-public interface ItemService {
+public interface ItemService {  
 
     /**
      * Adds a new item.

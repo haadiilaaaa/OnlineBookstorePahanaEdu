@@ -7,7 +7,7 @@
     <meta charset="UTF-8">
     <title>Manage Items</title>
 </head>
-<style>
+<style>     
 
         :root {
           --brown-dark: #5d4037;

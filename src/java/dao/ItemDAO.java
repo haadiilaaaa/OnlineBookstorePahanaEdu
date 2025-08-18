@@ -4,7 +4,7 @@ import model.Item;
 import java.util.List;
 import java.math.BigDecimal;
 
-public interface ItemDAO {
+public interface ItemDAO {  
     void save(Item item) throws Exception;
     List<Item> findAll() throws Exception;
        
