@@ -1,7 +1,7 @@
 package service.deliveryPartner;
 
 import dto.OrderDTO;
-import java.util.List;
+import java.util.List;   
 
 public interface DeliveryOrderService {
     List<OrderDTO> getOrdersAssignedToPartner(String partnerId) throws Exception;
