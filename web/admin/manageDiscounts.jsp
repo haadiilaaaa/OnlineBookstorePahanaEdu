@@ -505,7 +505,7 @@ body.dark-mode .dark-mode-toggle {
   user-select: none;
   line-height: 1;
 }
-.toggle-icon.moon {
+.toggle-icon.moon {    
   color: #fff;
 }
     </style>

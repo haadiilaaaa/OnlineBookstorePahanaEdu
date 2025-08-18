@@ -226,7 +226,7 @@
     <div style="background-color: #d4edda; color: #155724; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; border: 1px solid #c3e6cb;">
         ${successMessage}  
     </div>
-</c:if>
+</c:if>   
 
 <c:if test="${not empty errorMessage}">
     <div style="background-color: #f8d7da; color: #721c24; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; border: 1px solid #f5c6cb;">

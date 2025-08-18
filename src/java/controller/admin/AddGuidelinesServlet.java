@@ -36,7 +36,7 @@ protected void doPost(HttpServletRequest request, HttpServletResponse response)
         session.setAttribute("errorMessage", e.getMessage());
     } catch (Exception e) {
         session.setAttribute("errorMessage", "Failed to add guideline: " + e.getMessage());
-    }
+    }    
 
     response.sendRedirect("ManageGuidelinesServlet");
 }

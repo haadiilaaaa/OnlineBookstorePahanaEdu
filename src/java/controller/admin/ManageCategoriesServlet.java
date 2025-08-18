@@ -10,7 +10,7 @@ import util.enums.CommandResultType;
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
 import java.io.IOException;
-import java.util.List;
+import java.util.List;   
 
 /**
  * Handles category management (add/edit/delete/list) with full DIP-compliant command delegation.

@@ -5,7 +5,7 @@ import util.DAOExeption;
 
 import java.util.List;
 
-public interface GuidelineDAO {
+public interface GuidelineDAO {   
     void save(Guideline guideline) throws DAOExeption;
     void update(Guideline guideline) throws DAOExeption;
     void delete(String id) throws DAOExeption;

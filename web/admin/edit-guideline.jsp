@@ -5,7 +5,7 @@
 <head>
     <title>Edit Guideline</title>
 </head>
-<body>
+<body>   
     
     <c:if test="${not empty sessionScope.successMessage}">
     <div style="padding:12px; background:#4CAF50; color:white; border-radius:6px; margin-bottom:16px;">
