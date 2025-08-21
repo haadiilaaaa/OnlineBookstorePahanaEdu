@@ -147,7 +147,7 @@ Cloud deployment (AWS/Heroku).
 
 📜 How to Run Locally
 
-git clone https://github.com/your-username/Onile_bookstore_pahanaedu.git
+git clone https://github.com/haadiilaaaa/Onile_bookstore_pahanaedu.git
 cd Onile_bookstore_pahanaedu
 
 
